@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { Waves, Menu, X, LogOut, User, Shield, MapPin, FileText, Info, Calendar } from 'lucide-react';
+import { Waves, Menu, X, LogOut, User, Shield, MapPin, FileText, Info, Trophy } from 'lucide-react';
+import NotificationCenter from './NotificationCenter';
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -19,11 +20,11 @@ const Navbar = () => {
     { to: '/', label: 'Home', icon: Waves },
     { to: '/reports', label: 'Reports', icon: MapPin },
     { to: '/about', label: 'About', icon: Info },
-    { to: '/events', label: 'Events', icon: Calendar },
   ];
 
   if (user?.role === 'citizen') {
     navLinks.splice(2, 0, { to: '/submit-report', label: 'Report Hazard', icon: FileText });
+    navLinks.push({ to: '/gamification', label: 'Rewards', icon: Trophy });
   }
 
   if (isAdmin) {
@@ -33,51 +34,61 @@ const Navbar = () => {
   const isActive = (path) => location.pathname === path;
 
   return (
-    <nav className="bg-white shadow-lg sticky top-0 z-50">
+    <nav className="fixed top-0 w-full z-50 bg-white/90 backdrop-blur-xl border-b border-gray-100/30 shadow-lg">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-16">
-          {/* Logo */}
-          <Link to="/" className="flex items-center space-x-2 text-ocean-600 hover:text-ocean-700 transition-colors">
-            <div className="bg-ocean-500 p-2 rounded-lg">
-              <Waves className="h-6 w-6 text-white" />
+        <div className="flex justify-between items-center h-20">
+          <Link to="/" className="flex items-center space-x-3 group">
+            <div className="bg-gradient-to-br from-ocean-500 to-blue-600 p-3 rounded-2xl shadow-lg group-hover:scale-110 transition-all duration-300 group-hover:shadow-xl group-hover:rotate-3">
+              <Waves className="h-7 w-7 text-white" />
             </div>
-            <span className="font-bold text-lg hidden sm:block">TarangNetra</span>
-            <span className="font-bold text-lg sm:hidden">Endless vision for ocean safety</span>
+            <div className="hidden sm:block">
+              <div className="font-bold text-2xl bg-gradient-to-r from-ocean-600 to-blue-700 bg-clip-text text-transparent">
+                TarangNetra
+              </div>
+              <div className="text-xs text-gray-500 font-medium tracking-wide">Ocean Safety Vision</div>
+            </div>
           </Link>
 
-          {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center space-x-8">
+          <div className="hidden md:flex items-center space-x-2">
             {navLinks.map(({ to, label, icon: Icon }) => (
               <Link
                 key={to}
                 to={to}
-                className={`flex items-center space-x-1 px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+                className={`group flex items-center space-x-2 px-6 py-3 rounded-2xl text-sm font-semibold transition-all duration-300 relative hover:scale-105 transform ${
                   isActive(to)
-                    ? 'text-ocean-600 bg-ocean-50'
-                    : 'text-gray-600 hover:text-ocean-600 hover:bg-ocean-50'
+                    ? 'text-ocean-600 bg-ocean-50 shadow-md border border-ocean-200'
+                    : 'text-gray-600 hover:text-ocean-600 hover:bg-gray-50/80'
                 }`}
               >
-                <Icon className="h-4 w-4" />
+                <Icon className="h-4 w-4 group-hover:scale-110 transition-transform duration-300" />
                 <span>{label}</span>
+                {isActive(to) && (
+                  <div className="absolute bottom-1 left-1/2 transform -translate-x-1/2 w-6 h-1 bg-ocean-500 rounded-full"></div>
+                )}
               </Link>
             ))}
           </div>
 
-          {/* User Menu */}
-          <div className="hidden md:flex items-center space-x-4">
+          <div className="hidden md:flex items-center space-x-6">
             {user ? (
-              <div className="flex items-center space-x-4">
-                <div className="flex items-center space-x-2 text-sm">
-                  {user.role === 'admin' ? (
-                    <Shield className="h-4 w-4 text-coral-500" />
-                  ) : (
-                    <User className="h-4 w-4 text-ocean-500" />
-                  )}
-                  <span className="text-gray-700 font-medium">{user.name}</span>
+              <div className="flex items-center space-x-6">
+                <NotificationCenter />
+                <div className="flex items-center space-x-3 bg-gradient-to-r from-gray-50 to-gray-100 rounded-2xl px-5 py-3 border border-gray-200">
+                  <div className={`p-2 rounded-xl ${user.role === 'admin' ? 'bg-red-100' : 'bg-ocean-100'}`}>
+                    {user.role === 'admin' ? (
+                      <Shield className="h-5 w-5 text-red-600" />
+                    ) : (
+                      <User className="h-5 w-5 text-ocean-600" />
+                    )}
+                  </div>
+                  <div>
+                    <div className="text-sm font-bold text-gray-900">{user.name}</div>
+                    <div className="text-xs text-gray-500 capitalize font-medium">{user.role}</div>
+                  </div>
                 </div>
                 <button
                   onClick={handleLogout}
-                  className="flex items-center space-x-1 text-gray-600 hover:text-coral-500 transition-colors"
+                  className="bg-gradient-to-r from-gray-100 to-gray-200 hover:from-red-50 hover:to-red-100 text-gray-700 hover:text-red-600 px-5 py-3 rounded-2xl font-semibold text-sm flex items-center space-x-2 transition-all duration-300 border border-gray-200 hover:border-red-200"
                 >
                   <LogOut className="h-4 w-4" />
                   <span>Logout</span>
@@ -86,37 +97,35 @@ const Navbar = () => {
             ) : (
               <Link
                 to="/login"
-                className="bg-ocean-500 hover:bg-ocean-600 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors"
+                className="bg-gradient-to-r from-ocean-500 to-blue-600 hover:from-ocean-600 hover:to-blue-700 text-white px-8 py-3 rounded-2xl font-bold text-sm transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-105 transform"
               >
-                Login
+                Join Now
               </Link>
             )}
           </div>
 
-          {/* Mobile menu button */}
           <div className="md:hidden">
             <button
               onClick={() => setIsOpen(!isOpen)}
-              className="text-gray-600 hover:text-ocean-600 focus:outline-none"
+              className="p-3 rounded-2xl text-gray-600 hover:text-ocean-600 hover:bg-gray-50 transition-all duration-300"
             >
               {isOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
             </button>
           </div>
         </div>
 
-        {/* Mobile Navigation */}
         {isOpen && (
           <div className="md:hidden">
-            <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3 bg-white border-t">
+            <div className="px-4 pt-4 pb-6 space-y-2 bg-white/95 backdrop-blur-xl rounded-3xl mt-4 border border-gray-100 shadow-xl">
               {navLinks.map(({ to, label, icon: Icon }) => (
                 <Link
                   key={to}
                   to={to}
                   onClick={() => setIsOpen(false)}
-                  className={`flex items-center space-x-2 px-3 py-2 rounded-md text-base font-medium transition-colors ${
+                  className={`flex items-center space-x-3 px-6 py-4 rounded-2xl text-base font-semibold transition-all duration-300 ${
                     isActive(to)
-                      ? 'text-ocean-600 bg-ocean-50'
-                      : 'text-gray-600 hover:text-ocean-600 hover:bg-ocean-50'
+                      ? 'text-ocean-600 bg-ocean-50 border border-ocean-100'
+                      : 'text-gray-600 hover:text-ocean-600 hover:bg-gray-50'
                   }`}
                 >
                   <Icon className="h-5 w-5" />
@@ -125,18 +134,23 @@ const Navbar = () => {
               ))}
               
               {user ? (
-                <div className="border-t pt-4 mt-4">
-                  <div className="flex items-center space-x-2 px-3 py-2 text-sm text-gray-700">
-                    {user.role === 'admin' ? (
-                      <Shield className="h-4 w-4 text-coral-500" />
-                    ) : (
-                      <User className="h-4 w-4 text-ocean-500" />
-                    )}
-                    <span className="font-medium">{user.name}</span>
+                <div className="border-t border-gray-200 pt-6 mt-6 space-y-4">
+                  <div className="flex items-center space-x-4 px-6 py-4 bg-gradient-to-r from-gray-50 to-gray-100 rounded-2xl">
+                    <div className={`p-2 rounded-xl ${user.role === 'admin' ? 'bg-red-100' : 'bg-ocean-100'}`}>
+                      {user.role === 'admin' ? (
+                        <Shield className="h-6 w-6 text-red-600" />
+                      ) : (
+                        <User className="h-6 w-6 text-ocean-600" />
+                      )}
+                    </div>
+                    <div>
+                      <div className="font-bold text-gray-900">{user.name}</div>
+                      <div className="text-sm text-gray-500 capitalize">{user.role}</div>
+                    </div>
                   </div>
                   <button
                     onClick={handleLogout}
-                    className="flex items-center space-x-2 w-full text-left px-3 py-2 text-gray-600 hover:text-coral-500 transition-colors"
+                    className="flex items-center space-x-3 w-full px-6 py-4 text-red-600 hover:bg-red-50 rounded-2xl transition-all duration-300 font-semibold"
                   >
                     <LogOut className="h-5 w-5" />
                     <span>Logout</span>
@@ -146,9 +160,9 @@ const Navbar = () => {
                 <Link
                   to="/login"
                   onClick={() => setIsOpen(false)}
-                  className="block w-full text-center bg-ocean-500 hover:bg-ocean-600 text-white px-4 py-2 rounded-md text-base font-medium transition-colors mt-4"
+                  className="block w-full text-center bg-gradient-to-r from-ocean-500 to-blue-600 text-white px-6 py-4 rounded-2xl font-bold text-base mt-6"
                 >
-                  Login
+                  Join Now
                 </Link>
               )}
             </div>
