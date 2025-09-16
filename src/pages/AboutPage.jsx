@@ -59,33 +59,6 @@ const AboutPage = () => {
     }
   ];
 
-  const teamMembers = [
-    {
-      name: 'Dr. Priya Sharma',
-      role: 'Marine Scientist',
-      description: 'Leading oceanographer with 15+ years experience in coastal hazard research',
-      image: 'https://images.unsplash.com/photo-1494790108755-2616b612b786?w=150&h=150&fit=crop&crop=face'
-    },
-    {
-      name: 'Rajesh Kumar',
-      role: 'Technology Director',
-      description: 'Expert in marine monitoring systems and real-time data processing',
-      image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face'
-    },
-    {
-      name: 'Captain Meera Nair',
-      role: 'Operations Head',
-      description: 'Former Coast Guard officer with extensive maritime safety experience',
-      image: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150&h=150&fit=crop&crop=face'
-    },
-    {
-      name: 'Arjun Patel',
-      role: 'Community Coordinator',
-      description: 'Specializes in community engagement and local partnerships',
-      image: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face'
-    }
-  ];
-
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Hero Section */}
@@ -217,49 +190,31 @@ const AboutPage = () => {
         </div>
       </section>
 
-      {/* Team Section */}
-      <section className="py-16 bg-gray-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-4">
-              Meet Our Team
-            </h2>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              Dedicated professionals working around the clock to keep our oceans safe
-            </p>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-            {teamMembers.map((member, index) => (
-              <div key={index} className="bg-white rounded-xl shadow-lg p-6 text-center hover:shadow-xl transition-shadow">
-                <img
-                  src={member.image}
-                  alt={member.name}
-                  className="w-24 h-24 rounded-full mx-auto mb-4 object-cover"
-                />
-                <h3 className="text-lg font-semibold text-gray-900 mb-1">{member.name}</h3>
-                <p className="text-ocean-600 font-medium mb-3">{member.role}</p>
-                <p className="text-gray-600 text-sm">{member.description}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
       {/* Call to Action */}
-      <section className="py-16 bg-ocean-600 text-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-3xl lg:text-4xl font-bold mb-4">
+      <section className="relative py-20 bg-gradient-to-br from-ocean-600 via-ocean-700 to-blue-800 text-white overflow-hidden">
+        {/* Background Elements */}
+        <div className="absolute inset-0">
+          <div className="absolute -top-40 -right-40 w-80 h-80 bg-white rounded-full mix-blend-soft-light opacity-10 animate-pulse"></div>
+          <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-coral-400 rounded-full mix-blend-soft-light opacity-10 animate-pulse delay-1000"></div>
+        </div>
+        
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
+          <h2 className="text-4xl lg:text-6xl font-bold text-white mb-6">
             Join Our Mission
           </h2>
-          <p className="text-xl text-ocean-100 mb-8 max-w-2xl mx-auto">
-            Be part of the solution. Help us protect coastal communities by reporting ocean hazards in your area.
+          <p className="text-xl text-ocean-100 mb-12 max-w-3xl mx-auto">
+            Be part of the solution. Help us protect coastal communities by reporting ocean hazards in your area. 
+            Every report counts, every alert saves lives.
           </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <button className="bg-coral-500 hover:bg-coral-600 text-white px-8 py-3 rounded-lg font-semibold transition-colors">
+          
+          <div className="flex flex-col sm:flex-row gap-6 justify-center">
+            <button className="group bg-white hover:bg-gray-100 text-ocean-600 px-10 py-5 rounded-2xl font-bold text-lg transition-all duration-300 inline-flex items-center shadow-xl hover:shadow-2xl hover:scale-105 transform">
               Become a Reporter
+              <MapPin className="ml-3 h-6 w-6 group-hover:translate-x-2 transition-transform" />
             </button>
-            <button className="bg-white hover:bg-gray-100 text-ocean-600 px-8 py-3 rounded-lg font-semibold transition-colors">
+            <button className="group border-2 border-white text-white hover:bg-white hover:text-ocean-600 px-10 py-5 rounded-2xl font-bold text-lg transition-all duration-300 inline-flex items-center hover:scale-105 transform">
               Learn More
+              <TrendingUp className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
             </button>
           </div>
         </div>

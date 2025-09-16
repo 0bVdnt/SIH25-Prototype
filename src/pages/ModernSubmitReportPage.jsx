@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useGamification } from '../contexts/GamificationContext';
+import { showToast } from '../utils/toast';
 import { 
   Camera, MapPin, Upload, X, AlertTriangle, Waves, Wind, Trash2, 
   Zap, Eye, Navigation, RefreshCw, CheckCircle, Clock, MapIcon 
@@ -145,7 +146,7 @@ const ModernSubmitReportPage = () => {
       }, 100);
     } catch (error) {
       console.error('Error accessing camera:', error);
-      alert('Unable to access camera. Please check permissions and try again.');
+      showToast.error('Unable to access camera. Please check permissions and try again.');
     }
   };
 
@@ -281,7 +282,7 @@ const ModernSubmitReportPage = () => {
     });
 
     if (validFiles.length + formData.photos.length > 5) {
-      alert('Maximum 5 photos allowed');
+      showToast.warning('Maximum 5 photos allowed');
       return;
     }
 
@@ -370,7 +371,7 @@ const ModernSubmitReportPage = () => {
         const pointsEarned = awardPoints('reportSubmitted');
         
         // Show success message with points
-        alert(`Report submitted successfully! You earned ${pointsEarned} points. Thank you for helping keep our oceans safe!`);
+        showToast.success(`Report submitted successfully! You earned ${pointsEarned} points. Thank you for helping keep our oceans safe!`);
         navigate('/reports');
       } else {
         throw new Error('Failed to submit report');
@@ -380,7 +381,7 @@ const ModernSubmitReportPage = () => {
       // For demo purposes, still award points even if backend fails
       updateReportStats('submitted');
       const pointsEarned = awardPoints('reportSubmitted');
-      alert(`Demo: Report submitted successfully! You earned ${pointsEarned} points. Thank you for helping keep our oceans safe!`);
+      showToast.success(`Demo: Report submitted successfully! You earned ${pointsEarned} points. Thank you for helping keep our oceans safe!`);
       navigate('/reports');
     } finally {
       setIsSubmitting(false);
@@ -570,7 +571,7 @@ const ModernSubmitReportPage = () => {
                 rows={6}
                 maxLength={1000}
                 placeholder="Please provide detailed information about what you observed, when it occurred, current conditions, and any immediate dangers or concerns..."
-                className="modern-input resize-none"
+                className="w-full px-4 py-4 border-2 border-gray-200 rounded-xl bg-white/90 backdrop-blur-sm focus:border-ocean-500 focus:ring-4 focus:ring-ocean-100 transition-all duration-300 resize-none placeholder-gray-400 shadow-sm hover:shadow-md font-medium"
               />
               <div className="flex justify-between items-center mt-2">
                 {errors.description && <p className="text-sm text-red-600 font-medium">{errors.description}</p>}

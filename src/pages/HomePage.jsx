@@ -296,20 +296,21 @@ const HomePage = () => {
         </div>
       </section>
 
-      {/* Features Section */}
-      <section className="py-24 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      {/* Why This Platform Matters Section */}
+      <section className="py-24 bg-white relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-br from-blue-50/50 to-ocean-50/50"></div>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="text-center mb-20">
-            <div className="inline-flex items-center px-4 py-2 bg-ocean-100 text-ocean-800 rounded-full text-sm font-medium mb-6">
-              <Shield className="w-4 h-4 mr-2" />
-              Trusted by Coastal Communities
+            <div className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-ocean-100 to-blue-100 text-ocean-800 rounded-full text-sm font-medium mb-6 shadow-md">
+              <Shield className="w-5 h-5 mr-2" />
+              Why This Platform Matters
             </div>
-            <h2 className="text-4xl lg:text-5xl font-bold text-gray-900 mb-6">
-              Why Choose TarangNetra?
+            <h2 className="text-4xl lg:text-6xl font-bold text-gray-900 mb-6">
+              Our <span className="text-transparent bg-clip-text bg-gradient-to-r from-ocean-500 to-blue-600">Impact</span> on Ocean Safety
             </h2>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              Advanced technology meets community vigilance to create the most comprehensive 
-              ocean safety network in India.
+            <p className="text-xl text-gray-600 max-w-4xl mx-auto leading-relaxed">
+              Every second counts when it comes to ocean hazards. Our AI-powered platform connects 
+              coastal communities, authorities, and technology to create an unprecedented safety network.
             </p>
           </div>
           
@@ -317,15 +318,50 @@ const HomePage = () => {
             {features.map((feature, index) => (
               <div
                 key={index}
-                className="group bg-white p-8 rounded-3xl shadow-lg hover:shadow-2xl transition-all duration-500 border border-gray-100 hover:scale-105 transform cursor-pointer"
+                className="group bg-white p-8 rounded-3xl shadow-lg hover:shadow-2xl transition-all duration-500 border border-gray-100 hover:scale-105 transform cursor-pointer relative overflow-hidden"
               >
-                <div className={`bg-gradient-to-r ${feature.color} w-16 h-16 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300`}>
+                <div className="absolute top-0 right-0 w-20 h-20 bg-gradient-to-br from-ocean-100 to-blue-100 rounded-full -translate-y-10 translate-x-10 opacity-50"></div>
+                <div className={`bg-gradient-to-r ${feature.color} w-16 h-16 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300 relative z-10`}>
                   <feature.icon className="h-8 w-8 text-white" />
                 </div>
-                <h3 className="text-xl font-bold text-gray-900 mb-4">{feature.title}</h3>
-                <p className="text-gray-600 leading-relaxed">{feature.description}</p>
+                <h3 className="text-xl font-bold text-gray-900 mb-4 relative z-10">{feature.title}</h3>
+                <p className="text-gray-600 leading-relaxed relative z-10">{feature.description}</p>
+                <div className="mt-6 flex items-center text-ocean-600 font-semibold text-sm group-hover:text-ocean-700 transition-colors relative z-10">
+                  <span>Learn more</span>
+                  <ArrowRight className="h-4 w-4 ml-2 group-hover:translate-x-1 transition-transform" />
+                </div>
               </div>
             ))}
+          </div>
+
+          {/* Impact Statistics */}
+          <div className="mt-20 bg-gradient-to-r from-ocean-500 to-blue-600 rounded-3xl p-8 md:p-12 text-white relative overflow-hidden">
+            <div className="absolute inset-0 bg-white/10 backdrop-blur-sm"></div>
+            <div className="relative z-10">
+              <div className="text-center mb-12">
+                <h3 className="text-3xl md:text-4xl font-bold mb-4">Real Impact, Real Lives Saved</h3>
+                <p className="text-blue-100 text-lg">Our platform's achievements in ocean safety</p>
+              </div>
+              
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
+                <div className="group hover:scale-105 transition-transform duration-300">
+                  <div className="text-4xl md:text-5xl font-bold mb-2">1,247</div>
+                  <div className="text-blue-100 font-medium">Lives Protected</div>
+                </div>
+                <div className="group hover:scale-105 transition-transform duration-300">
+                  <div className="text-4xl md:text-5xl font-bold mb-2">95%</div>
+                  <div className="text-blue-100 font-medium">Accuracy Rate</div>
+                </div>
+                <div className="group hover:scale-105 transition-transform duration-300">
+                  <div className="text-4xl md:text-5xl font-bold mb-2">24/7</div>
+                  <div className="text-blue-100 font-medium">Monitoring</div>
+                </div>
+                <div className="group hover:scale-105 transition-transform duration-300">
+                  <div className="text-4xl md:text-5xl font-bold mb-2">156</div>
+                  <div className="text-blue-100 font-medium">Active Alerts</div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </section>

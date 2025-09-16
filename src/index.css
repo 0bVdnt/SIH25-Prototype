@@ -169,23 +169,9 @@
 
   /* Modern Input Styles */
   .modern-input {
-    background: rgba(255, 255, 255, 0.9);
-    border: 2px solid var(--gray-200);
-    border-radius: var(--radius-lg);
-    padding: 0.875rem 1.25rem;
-    font-size: 1rem;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    box-shadow: var(--shadow-sm);
-  }
-
-  .modern-input:focus {
-    border-color: var(--primary-500);
-    box-shadow: 0 0 0 3px rgba(0, 102, 204, 0.1);
-    background: white;
-  }
-
-  .modern-input::placeholder {
-    color: var(--gray-400);
+    @apply w-full px-4 py-3 border-2 border-gray-200 rounded-xl bg-white/90 backdrop-blur-sm 
+           focus:border-ocean-500 focus:ring-4 focus:ring-ocean-100 transition-all duration-300 
+           placeholder-gray-400 shadow-sm hover:shadow-md font-medium text-gray-800;
   }
 
   /* Glassmorphism Effect */
@@ -333,6 +319,31 @@
 
   .tooltip:hover::after {
     opacity: 1;
+  }
+
+  /* Line Clamp Utilities */
+  .line-clamp-1 {
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 1;
+    line-clamp: 1;
+  }
+  
+  .line-clamp-2 {
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+  }
+  
+  .line-clamp-3 {
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 3;
+    line-clamp: 3;
   }
 
   /* Responsive Utilities */

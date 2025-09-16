@@ -49,24 +49,26 @@ const Navbar = () => {
             </div>
           </Link>
 
-          <div className="hidden md:flex items-center space-x-2">
-            {navLinks.map(({ to, label, icon: Icon }) => (
-              <Link
-                key={to}
-                to={to}
-                className={`group flex items-center space-x-2 px-6 py-3 rounded-2xl text-sm font-semibold transition-all duration-300 relative hover:scale-105 transform ${
-                  isActive(to)
-                    ? 'text-ocean-600 bg-ocean-50 shadow-md border border-ocean-200'
-                    : 'text-gray-600 hover:text-ocean-600 hover:bg-gray-50/80'
-                }`}
-              >
-                <Icon className="h-4 w-4 group-hover:scale-110 transition-transform duration-300" />
-                <span>{label}</span>
-                {isActive(to) && (
-                  <div className="absolute bottom-1 left-1/2 transform -translate-x-1/2 w-6 h-1 bg-ocean-500 rounded-full"></div>
-                )}
-              </Link>
-            ))}
+          <div className="hidden md:flex items-center">
+            <div className="flex items-center bg-gray-50/50 rounded-2xl p-1 border border-gray-100">
+              {navLinks.map(({ to, label, icon: Icon }) => (
+                <Link
+                  key={to}
+                  to={to}
+                  className={`group flex items-center justify-center space-x-2 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all duration-300 relative min-w-[120px] text-center ${
+                    isActive(to)
+                      ? 'text-ocean-600 bg-white shadow-md border border-ocean-200'
+                      : 'text-gray-600 hover:text-ocean-600 hover:bg-white/60'
+                  }`}
+                >
+                  <Icon className="h-4 w-4 group-hover:scale-110 transition-transform duration-300" />
+                  <span className="whitespace-nowrap">{label}</span>
+                  {isActive(to) && (
+                    <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-6 h-0.5 bg-ocean-500 rounded-full"></div>
+                  )}
+                </Link>
+              ))}
+            </div>
           </div>
 
           <div className="hidden md:flex items-center space-x-6">

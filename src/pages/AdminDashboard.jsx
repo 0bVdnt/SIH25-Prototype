@@ -1,5 +1,7 @@
 import React, { useState, useRef } from 'react';
-import { useNotifications } from '../contexts/NotificationContext';
+import { showToast } from '../utils/toast';
+import jsPDF from 'jspdf';
+import html2canvas from 'html2canvas';
 import { 
   BarChart3, 
   List, 
@@ -27,6 +29,7 @@ import {
   Search,
   Calendar,
   PieChart,
+  MapPin,
   BarChart,
   Bell
 } from 'lucide-react';
@@ -52,7 +55,6 @@ import ClusterAlertSystem from '../components/ClusterAlertSystem';
 import INCOISIntegration from '../components/INCOISIntegration';
 
 const AdminDashboard = () => {
-  const { sendEmergencyAlert: broadcastAlert, showNotification } = useNotifications();
   const [activeTab, setActiveTab] = useState('overview');
   const [reports, setReports] = useState(mockReports);
   const [selectedReport, setSelectedReport] = useState(null);
@@ -155,9 +157,12 @@ const AdminDashboard = () => {
 
   const sendEmergencyAlert = async () => {
     if (!emergencyAlert.title || !emergencyAlert.message) {
-      alert('Please fill in all required fields');
+      showToast.error('Please fill in all required fields');
       return;
     }
+
+    // Show loading toast
+    const loadingToastId = showToast.loading('Sending emergency alert...');
 
     try {
       // Create comprehensive alert payload
@@ -170,22 +175,44 @@ const AdminDashboard = () => {
         channel: 'emergency'
       };
       
-      // Broadcast to all citizens
-      await broadcastAlert(alertPayload);
-      
-      // Show local notification to admin
-      showNotification({
-        type: 'success',
-        title: 'Emergency Alert Sent',
-        message: `"${emergencyAlert.title}" has been broadcast to all citizens in the area.`,
-        priority: 'high'
-      });
-      
-      // Simulate sending to emergency services
-      console.log('Alert sent to emergency services:', alertPayload);
-      
-      // Show success feedback
-      alert(`✅ Emergency alert "${emergencyAlert.title}" successfully broadcast to all citizens!\n\n📍 Location: ${emergencyAlert.location}\n🚨 Severity: ${emergencyAlert.severity.toUpperCase()}\n📱 Estimated reach: ${emergencyAlert.severity === 'high' ? '10,000+' : '5,000+'} users`);
+      // Try API call to backend, fallback to demo mode if no backend
+      let response;
+      try {
+        response = await fetch('/api/alerts/emergency', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${localStorage.getItem('adminToken') || 'demo-token'}`
+          },
+          body: JSON.stringify(alertPayload)
+        });
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const result = await response.json();
+        
+        // Dismiss loading toast and show success
+        showToast.dismiss(loadingToastId);
+        showToast.success(
+          `✅ Emergency alert "${emergencyAlert.title}" successfully broadcast!\n\n📍 Location: ${emergencyAlert.location}\n🚨 Severity: ${emergencyAlert.severity.toUpperCase()}\n📱 Estimated reach: ${emergencyAlert.severity === 'high' ? '10,000+' : '5,000+'} users`,
+          { autoClose: 8000 }
+        );
+      } catch (fetchError) {
+        // Fallback to demo mode if API is not available
+        console.log('API not available, running in demo mode:', fetchError.message);
+        
+        // Simulate processing delay
+        await new Promise(resolve => setTimeout(resolve, 1500));
+        
+        // Dismiss loading toast and show demo success
+        showToast.dismiss(loadingToastId);
+        showToast.success(
+          `🎯 Demo Mode: Emergency alert "${emergencyAlert.title}" simulated successfully!\n\n📍 Location: ${emergencyAlert.location}\n🚨 Severity: ${emergencyAlert.severity.toUpperCase()}\n📱 Estimated reach: ${emergencyAlert.severity === 'high' ? '10,000+' : '5,000+'} users\n\n💡 In production, this would broadcast to real emergency services.`,
+          { autoClose: 8000 }
+        );
+      }
       
       // Reset form and close modal
       setEmergencyAlert({
@@ -198,15 +225,17 @@ const AdminDashboard = () => {
       setShowEmergencyAlert(false);
       
     } catch (error) {
+      // Dismiss loading toast and show error
+      showToast.dismiss(loadingToastId);
       console.error('Failed to send emergency alert:', error);
-      alert('Failed to send emergency alert. Please try again.');
+      showToast.error('Failed to send emergency alert. Please try again.');
     }
   };
 
   const generateAnalysis = async () => {
     try {
       // Show loading state
-      alert('Generating comprehensive analysis... This may take a moment.');
+      const loadingToast = showToast.loading('Generating comprehensive analysis... This may take a moment.');
       
       // Generate comprehensive analysis with AI insights
       const analysis = {
@@ -251,22 +280,21 @@ const AdminDashboard = () => {
       setAnalysisResults(analysis);
       setShowAnalysisModal(true);
       
-      // Show success notification
-      showNotification({
-        type: 'success',
-        title: 'Analysis Generated',
-        message: 'Comprehensive hazard analysis ready for review and export.',
-        priority: 'medium'
-      });
+      // Dismiss loading toast and show success
+      showToast.dismiss();
+      showToast.success('Comprehensive analysis generated successfully! Ready for review and export.');
       
     } catch (error) {
       console.error('Analysis generation failed:', error);
-      alert('Failed to generate analysis. Please try again.');
+      showToast.dismiss();
+      showToast.error('Failed to generate analysis. Please try again.');
     }
   };
 
-  const exportToPDF = () => {
+  const exportToPDF = async () => {
     try {
+      showToast.loading('Generating PDF report...');
+
       // Create a comprehensive report for PDF export
       const reportData = {
         generatedAt: new Date().toISOString(),
@@ -292,62 +320,136 @@ const AdminDashboard = () => {
         ]
       };
 
-      // Create PDF content (in a real app, you'd use a library like jsPDF)
-      const pdfContent = `
-OCEAN HAZARD ANALYSIS REPORT
-Generated: ${new Date(reportData.generatedAt).toLocaleString()}
-Period: ${reportData.period}
+      // Initialize jsPDF
+      const doc = new jsPDF('p', 'mm', 'a4');
+      const pageWidth = doc.internal.pageSize.width;
+      const pageHeight = doc.internal.pageSize.height;
+      const margin = 20;
+      let currentY = margin;
 
-EXECUTIVE SUMMARY
-==================
-Total Reports: ${reportData.summary.total}
-Verified Reports: ${reportData.summary.verified}
-Pending Reviews: ${reportData.summary.pending}
-False Alarms: ${reportData.summary.falseAlarm}
-High Severity: ${reportData.summary.highSeverity}
-Accuracy Rate: ${reportData.summary.accuracyRate}
+      // Helper function to add text with auto-wrap
+      const addWrappedText = (text, x, y, maxWidth, fontSize = 10) => {
+        doc.setFontSize(fontSize);
+        const lines = doc.splitTextToSize(text, maxWidth);
+        doc.text(lines, x, y);
+        return y + (lines.length * fontSize * 0.35);
+      };
 
-HAZARD DISTRIBUTION
-===================
-${reportData.hazardDistribution.map(h => `${h.type}: ${h.count} reports`).join('\n')}
+      // Header
+      doc.setFontSize(20);
+      doc.setFont('helvetica', 'bold');
+      doc.text('OCEAN HAZARD ANALYSIS REPORT', pageWidth / 2, currentY, { align: 'center' });
+      currentY += 15;
 
-KEY INSIGHTS
-============
-${reportData.keyInsights.map(insight => `• ${insight}`).join('\n')}
+      doc.setFontSize(12);
+      doc.setFont('helvetica', 'normal');
+      doc.text(`Generated: ${new Date(reportData.generatedAt).toLocaleString()}`, pageWidth / 2, currentY, { align: 'center' });
+      currentY += 10;
+      doc.text(`Analysis Period: ${reportData.period}`, pageWidth / 2, currentY, { align: 'center' });
+      currentY += 20;
 
-RECOMMENDATIONS
-===============
-${reportData.recommendations.map((rec, i) => `${i + 1}. ${rec}`).join('\n')}
+      // Executive Summary
+      doc.setFontSize(16);
+      doc.setFont('helvetica', 'bold');
+      doc.text('EXECUTIVE SUMMARY', margin, currentY);
+      currentY += 10;
 
-RECENT ACTIVITY
-===============
-${reportData.recentActivity.map(activity => `• ${activity.action} - ${activity.report} (${activity.time})`).join('\n')}
-      `;
+      doc.setFontSize(10);
+      doc.setFont('helvetica', 'normal');
+      const summaryData = [
+        `Total Reports: ${reportData.summary.total}`,
+        `Verified Reports: ${reportData.summary.verified}`,
+        `Pending Reviews: ${reportData.summary.pending}`,
+        `False Alarms: ${reportData.summary.falseAlarm}`,
+        `High Severity Reports: ${reportData.summary.highSeverity}`,
+        `Accuracy Rate: ${reportData.summary.accuracyRate}`
+      ];
 
-      // Create downloadable file
-      const blob = new Blob([pdfContent], { type: 'text/plain' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `Ocean_Hazard_Report_${new Date().toISOString().slice(0, 10)}.txt`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
+      summaryData.forEach(item => {
+        doc.text(item, margin, currentY);
+        currentY += 6;
+      });
+      currentY += 10;
 
-      // Show success notification
-      showNotification({
-        type: 'success',
-        title: 'Report Exported',
-        message: 'Comprehensive analysis report has been downloaded successfully.',
-        priority: 'medium'
+      // Hazard Distribution
+      doc.setFontSize(16);
+      doc.setFont('helvetica', 'bold');
+      doc.text('HAZARD DISTRIBUTION', margin, currentY);
+      currentY += 10;
+
+      doc.setFontSize(10);
+      doc.setFont('helvetica', 'normal');
+      reportData.hazardDistribution.forEach(hazard => {
+        doc.text(`${hazard.type}: ${hazard.count} reports`, margin, currentY);
+        currentY += 6;
+      });
+      currentY += 10;
+
+      // Key Insights
+      doc.setFontSize(16);
+      doc.setFont('helvetica', 'bold');
+      doc.text('KEY INSIGHTS', margin, currentY);
+      currentY += 10;
+
+      doc.setFontSize(10);
+      doc.setFont('helvetica', 'normal');
+      reportData.keyInsights.forEach(insight => {
+        currentY = addWrappedText(`• ${insight}`, margin, currentY, pageWidth - 2 * margin);
+        currentY += 4;
+      });
+      currentY += 10;
+
+      // Recommendations
+      doc.setFontSize(16);
+      doc.setFont('helvetica', 'bold');
+      doc.text('RECOMMENDATIONS', margin, currentY);
+      currentY += 10;
+
+      doc.setFontSize(10);
+      doc.setFont('helvetica', 'normal');
+      reportData.recommendations.forEach((rec, i) => {
+        currentY = addWrappedText(`${i + 1}. ${rec}`, margin, currentY, pageWidth - 2 * margin);
+        currentY += 4;
       });
 
-      alert('✅ Report exported successfully!\n\nThe comprehensive analysis has been downloaded to your device.');
+      // Check if we need a new page
+      if (currentY > pageHeight - 50) {
+        doc.addPage();
+        currentY = margin;
+      }
+
+      currentY += 10;
+
+      // Recent Activity
+      doc.setFontSize(16);
+      doc.setFont('helvetica', 'bold');
+      doc.text('RECENT ACTIVITY', margin, currentY);
+      currentY += 10;
+
+      doc.setFontSize(10);
+      doc.setFont('helvetica', 'normal');
+      reportData.recentActivity.slice(0, 10).forEach(activity => {
+        currentY = addWrappedText(`• ${activity.action} - ${activity.report} (${activity.time})`, margin, currentY, pageWidth - 2 * margin);
+        currentY += 4;
+      });
+
+      // Footer
+      const footerY = pageHeight - 15;
+      doc.setFontSize(8);
+      doc.setFont('helvetica', 'italic');
+      doc.text('Generated by Ocean Hazard Reporter System', pageWidth / 2, footerY, { align: 'center' });
+
+      // Save the PDF
+      const fileName = `Ocean_Hazard_Report_${new Date().toISOString().slice(0, 10)}.pdf`;
+      doc.save(fileName);
+
+      showToast.dismiss();
+      showToast.success('✅ PDF report exported successfully!\n\nThe comprehensive analysis has been downloaded to your device.');
       
     } catch (error) {
       console.error('PDF export failed:', error);
-      alert('Failed to export report. Please try again.');
+      showToast.dismiss();
+      showToast.error('Failed to export PDF report. Please try again.');
     }
   };
 
@@ -381,7 +483,7 @@ ${reportData.recentActivity.map(activity => `• ${activity.action} - ${activity
     
     // Simulate alert sending
     if (actionType === 'verify') {
-      alert(`Alert sent successfully for ${selectedReport.title}`);
+      showToast.success(`Alert sent successfully for ${selectedReport.title}`);
     }
   };
 
@@ -581,106 +683,6 @@ ${reportData.recentActivity.map(activity => `• ${activity.action} - ${activity
               </div>
             </div>
 
-            {/* Collapsible Analytics Section */}
-            <div className="space-y-6">
-              <button
-                onClick={() => toggleSection('analytics')}
-                className="w-full flex items-center justify-between p-6 bg-white rounded-3xl shadow-lg hover:shadow-xl transition-all duration-300"
-              >
-                <div className="flex items-center space-x-3">
-                  <BarChart3 className="h-6 w-6 text-ocean-600" />
-                  <h3 className="text-xl font-bold text-gray-900">Advanced Analytics</h3>
-                </div>
-                {expandedSections.analytics ? (
-                  <ChevronDown className="h-6 w-6 text-gray-400" />
-                ) : (
-                  <ChevronRight className="h-6 w-6 text-gray-400" />
-                )}
-              </button>
-
-              {expandedSections.analytics && (
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                  {/* Hazard Types Chart */}
-                  <div className="bg-white p-8 rounded-3xl shadow-lg">
-                    <div className="flex items-center space-x-3 mb-6">
-                      <BarChart className="h-6 w-6 text-blue-600" />
-                      <h4 className="text-lg font-bold text-gray-900">Hazard Distribution</h4>
-                    </div>
-                    <ResponsiveContainer width="100%" height={300}>
-                      <RechartsBarChart data={hazardTypeData}>
-                        <CartesianGrid strokeDasharray="3 3" stroke="#e0e7ff" />
-                        <XAxis dataKey="type" tick={{fontSize: 12}} angle={-45} textAnchor="end" height={80} />
-                        <YAxis />
-                        <Tooltip />
-                        <Bar dataKey="count" fill="url(#blueGradient)" radius={[8, 8, 0, 0]} />
-                        <defs>
-                          <linearGradient id="blueGradient" x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.9}/>
-                            <stop offset="95%" stopColor="#1d4ed8" stopOpacity={0.9}/>
-                          </linearGradient>
-                        </defs>
-                      </RechartsBarChart>
-                    </ResponsiveContainer>
-                  </div>
-
-                  {/* Status Distribution */}
-                  <div className="bg-white p-8 rounded-3xl shadow-lg">
-                    <div className="flex items-center space-x-3 mb-6">
-                      <PieChart className="h-6 w-6 text-green-600" />
-                      <h4 className="text-lg font-bold text-gray-900">Status Breakdown</h4>
-                    </div>
-                    <ResponsiveContainer width="100%" height={300}>
-                      <RechartsPieChart>
-                        <Pie
-                          data={statusData}
-                          cx="50%"
-                          cy="50%"
-                          labelLine={false}
-                          label={({status, count}) => `${status}: ${count}`}
-                          outerRadius={80}
-                          fill="#8884d8"
-                          dataKey="count"
-                        >
-                          {statusData.map((entry, index) => (
-                            <Cell key={`cell-${index}`} fill={entry.color} />
-                          ))}
-                        </Pie>
-                        <Tooltip />
-                      </RechartsPieChart>
-                    </ResponsiveContainer>
-                  </div>
-
-                  {/* Time Series Analytics */}
-                  <div className="bg-white p-8 rounded-3xl shadow-lg lg:col-span-2">
-                    <div className="flex items-center space-x-3 mb-6">
-                      <TrendingUp className="h-6 w-6 text-purple-600" />
-                      <h4 className="text-lg font-bold text-gray-900">7-Day Trend Analysis</h4>
-                    </div>
-                    <ResponsiveContainer width="100%" height={300}>
-                      <AreaChart data={timeAnalytics}>
-                        <CartesianGrid strokeDasharray="3 3" />
-                        <XAxis dataKey="date" />
-                        <YAxis />
-                        <Tooltip />
-                        <Area type="monotone" dataKey="reports" stackId="1" stroke="#8884d8" fill="url(#purpleGradient)" />
-                        <Area type="monotone" dataKey="verified" stackId="1" stroke="#82ca9d" fill="url(#greenGradient)" />
-                        <defs>
-                          <linearGradient id="purpleGradient" x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="5%" stopColor="#8884d8" stopOpacity={0.8}/>
-                            <stop offset="95%" stopColor="#8884d8" stopOpacity={0.3}/>
-                          </linearGradient>
-                          <linearGradient id="greenGradient" x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="5%" stopColor="#82ca9d" stopOpacity={0.8}/>
-                            <stop offset="95%" stopColor="#82ca9d" stopOpacity={0.3}/>
-                          </linearGradient>
-                        </defs>
-                      </AreaChart>
-                    </ResponsiveContainer>
-                  </div>
-                </div>
-              )}
-            </div>
-
             {/* Live Activity Feed */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               <div className="bg-white p-6 rounded-xl shadow-sm">
@@ -700,28 +702,192 @@ ${reportData.recentActivity.map(activity => `• ${activity.action} - ${activity
                   ))}
                 </div>
               </div>
+            </div>
+          </div>
+        )}
 
-              <div className="bg-white p-6 rounded-xl shadow-sm">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h3>
-                <div className="space-y-3">
-                  <button className="w-full bg-green-500 hover:bg-green-600 text-white p-3 rounded-lg text-left transition-colors">
-                    <div className="flex items-center justify-between">
-                      <span>Send Emergency Alert</span>
-                      <Send className="h-4 w-4" />
-                    </div>
+        {activeTab === 'analytics' && (
+          <div className="space-y-8">
+            {/* Analytics Header */}
+            <div className="bg-gradient-to-r from-indigo-600 to-purple-600 rounded-3xl p-8 text-white">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-3xl font-bold mb-2">Advanced Analytics</h2>
+                  <p className="text-indigo-100">Comprehensive data insights and predictive analysis</p>
+                </div>
+                <div className="flex items-center space-x-4">
+                  <TrendingUp className="h-12 w-12 text-indigo-200" />
+                  <button
+                    onClick={exportToPDF}
+                    className="bg-white/20 hover:bg-white/30 px-6 py-3 rounded-xl font-semibold transition-all duration-300"
+                  >
+                    📊 Export Analytics Report
                   </button>
-                  <button className="w-full bg-blue-500 hover:bg-blue-600 text-white p-3 rounded-lg text-left transition-colors">
-                    <div className="flex items-center justify-between">
-                      <span>Bulk Verify Reports</span>
-                      <CheckCircle2 className="h-4 w-4" />
-                    </div>
-                  </button>
-                  <button className="w-full bg-purple-500 hover:bg-purple-600 text-white p-3 rounded-lg text-left transition-colors">
-                    <div className="flex items-center justify-between">
-                      <span>Generate Analytics</span>
-                      <TrendingUp className="h-4 w-4" />
-                    </div>
-                  </button>
+                </div>
+              </div>
+            </div>
+
+            {/* Analytics Grid */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              {/* Hazard Type Distribution Chart */}
+              <div className="bg-white p-6 rounded-2xl shadow-lg">
+                <div className="flex items-center justify-between mb-6">
+                  <h3 className="text-xl font-bold text-gray-800">Hazard Distribution</h3>
+                  <div className="bg-blue-100 p-2 rounded-lg">
+                    <BarChart3 className="h-5 w-5 text-blue-600" />
+                  </div>
+                </div>
+                <ResponsiveContainer width="100%" height={300}>
+                  <RechartsBarChart data={hazardTypeData}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                    <XAxis dataKey="type" tick={{fontSize: 11}} angle={-45} textAnchor="end" height={80} />
+                    <YAxis />
+                    <Tooltip 
+                      contentStyle={{
+                        backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                        border: 'none',
+                        borderRadius: '12px',
+                        boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)'
+                      }}
+                    />
+                    <Bar dataKey="count" fill="url(#blueGradient)" radius={[4, 4, 0, 0]} />
+                    <defs>
+                      <linearGradient id="blueGradient" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.9}/>
+                        <stop offset="95%" stopColor="#1d4ed8" stopOpacity={0.9}/>
+                      </linearGradient>
+                    </defs>
+                  </RechartsBarChart>
+                </ResponsiveContainer>
+              </div>
+
+              {/* Status Distribution Pie Chart */}
+              <div className="bg-white p-6 rounded-2xl shadow-lg">
+                <div className="flex items-center justify-between mb-6">
+                  <h3 className="text-xl font-bold text-gray-800">Status Distribution</h3>
+                  <div className="bg-green-100 p-2 rounded-lg">
+                    <PieChart className="h-5 w-5 text-green-600" />
+                  </div>
+                </div>
+                <ResponsiveContainer width="100%" height={300}>
+                  <RechartsPieChart>
+                    <Pie
+                      data={statusData}
+                      cx="50%"
+                      cy="50%"
+                      labelLine={false}
+                      label={({status, count}) => `${status}: ${count}`}
+                      outerRadius={80}
+                      fill="#8884d8"
+                      dataKey="count"
+                    >
+                      {statusData.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={entry.color} />
+                      ))}
+                    </Pie>
+                    <Tooltip />
+                  </RechartsPieChart>
+                </ResponsiveContainer>
+              </div>
+
+              {/* Time Series Analysis */}
+              <div className="bg-white p-6 rounded-2xl shadow-lg">
+                <div className="flex items-center justify-between mb-6">
+                  <h3 className="text-xl font-bold text-gray-800">Reports Timeline</h3>
+                  <div className="bg-purple-100 p-2 rounded-lg">
+                    <LineChart className="h-5 w-5 text-purple-600" />
+                  </div>
+                </div>
+                <ResponsiveContainer width="100%" height={300}>
+                  <LineChart data={timeAnalytics}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                    <XAxis dataKey="date" tick={{fontSize: 11}} />
+                    <YAxis />
+                    <Tooltip 
+                      contentStyle={{
+                        backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                        border: 'none',
+                        borderRadius: '12px',
+                        boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)'
+                      }}
+                    />
+                    <Line type="monotone" dataKey="reports" stroke="#8b5cf6" strokeWidth={3} dot={{fill: '#8b5cf6', strokeWidth: 2, r: 4}} />
+                  </LineChart>
+                </ResponsiveContainer>
+              </div>
+
+              {/* Severity Heat Map */}
+              <div className="bg-white p-6 rounded-2xl shadow-lg">
+                <div className="flex items-center justify-between mb-6">
+                  <h3 className="text-xl font-bold text-gray-800">Severity Analysis</h3>
+                  <div className="bg-red-100 p-2 rounded-lg">
+                    <AreaChart className="h-5 w-5 text-red-600" />
+                  </div>
+                </div>
+                <ResponsiveContainer width="100%" height={300}>
+                  <AreaChart data={severityData}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                    <XAxis dataKey="severity" />
+                    <YAxis />
+                    <Tooltip 
+                      contentStyle={{
+                        backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                        border: 'none',
+                        borderRadius: '12px',
+                        boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)'
+                      }}
+                    />
+                    <Area type="monotone" dataKey="count" stroke="#ef4444" fill="url(#redGradient)" />
+                    <defs>
+                      <linearGradient id="redGradient" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="#ef4444" stopOpacity={0.8}/>
+                        <stop offset="95%" stopColor="#dc2626" stopOpacity={0.2}/>
+                      </linearGradient>
+                    </defs>
+                  </AreaChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
+
+            {/* Key Metrics Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              <div className="bg-gradient-to-br from-cyan-500 to-blue-600 p-6 rounded-2xl text-white">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-cyan-100 text-sm">Accuracy Rate</p>
+                    <p className="text-2xl font-bold">{((stats.verified / (stats.verified + stats.falseAlarm)) * 100).toFixed(1)}%</p>
+                  </div>
+                  <CheckCircle2 className="h-8 w-8 text-cyan-200" />
+                </div>
+              </div>
+              
+              <div className="bg-gradient-to-br from-emerald-500 to-green-600 p-6 rounded-2xl text-white">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-emerald-100 text-sm">Response Time</p>
+                    <p className="text-2xl font-bold">4.2min</p>
+                  </div>
+                  <Clock className="h-8 w-8 text-emerald-200" />
+                </div>
+              </div>
+              
+              <div className="bg-gradient-to-br from-violet-500 to-purple-600 p-6 rounded-2xl text-white">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-violet-100 text-sm">AI Confidence</p>
+                    <p className="text-2xl font-bold">94.3%</p>
+                  </div>
+                  <Brain className="h-8 w-8 text-violet-200" />
+                </div>
+              </div>
+              
+              <div className="bg-gradient-to-br from-orange-500 to-red-500 p-6 rounded-2xl text-white">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-orange-100 text-sm">Alert Coverage</p>
+                    <p className="text-2xl font-bold">12.4km</p>
+                  </div>
+                  <MapPin className="h-8 w-8 text-orange-200" />
                 </div>
               </div>
             </div>
