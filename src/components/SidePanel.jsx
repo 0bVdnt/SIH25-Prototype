@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { Box, Typography, Paper, IconButton, Button, ToggleButtonGroup, ToggleButton, useTheme } from '@mui/material';
 import { motion, AnimatePresence } from 'framer-motion';
 import MenuIcon from '@mui/icons-material/Menu';
@@ -6,6 +6,7 @@ import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
 import { mockIncidents } from '../mockData';
 import ReportCard from './ReportCard';
 import { Switch, FormControlLabel } from '@mui/material';
+import MicIcon from '@mui/icons-material/Mic'; // Import the microphone icon
 
 // Animation variants for Framer-motion
 const panelVariants = {
@@ -23,6 +24,9 @@ function SidePanel({
   setShowSensors,
   showPrediction,
   setShowPrediction,
+  onVoiceReport,
+  onIssueAlert,
+  onFilterChange
 }) {
   const [filter, setFilter] = useState('All');
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -38,6 +42,10 @@ function SidePanel({
     if (filter === 'All') return mockIncidents;
     return mockIncidents.filter(inc => inc.status === filter);
   }, [filter]);
+
+  // useEffect(() => {
+  //   onFilterChange(filteredIncidents);
+  // }, [filteredIncidents, onFilterChange]);
 
   const handleCardClick = (incident) => {
     setSelectedIncident(incident);
@@ -55,9 +63,18 @@ function SidePanel({
           variant="contained"
           startIcon={<AddCircleOutlineIcon />}
           onClick={onAddReport}
-          sx={{ display: { xs: 'none', md: 'flex' } }} // Hide on mobile
+          sx={{ display: { xs: 'none', md: 'flex' }, mr: 1 }} // Hide on mobile
         >
           Add Report
+        </Button>
+        {/* NEW VOICE REPORT BUTTON */}
+        <Button
+          variant="outlined"
+          startIcon={<MicIcon />}
+          onClick={onVoiceReport} // Use the new prop
+          sx={{ display: { xs: 'none', md: 'flex' } }}
+        >
+          Voice
         </Button>
       </Box>
 
@@ -98,6 +115,8 @@ function SidePanel({
                 incident={incident}
                 isSelected={selectedIncident?.id === incident.id}
                 onClick={() => handleCardClick(incident)}
+                // Pass the onIssueAlert prop down, but specify which incident it's for
+                onIssueAlert={() => onIssueAlert(incident)}
               />
             </motion.div>
           ))}

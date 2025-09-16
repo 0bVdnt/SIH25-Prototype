@@ -1,10 +1,11 @@
 
 import React from 'react';
-import { Box, Typography, Chip } from '@mui/material';
+import { Box, Typography, Chip, Button } from '@mui/material';
 import { motion } from 'framer-motion';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
 import WarningAmberIcon from '@mui/icons-material/WarningAmber';
+import CrisisAlertIcon from '@mui/icons-material/CrisisAlert'; // Import new icon
 
 const getSeverityStyles = (severity) => {
   switch (severity) {
@@ -14,7 +15,7 @@ const getSeverityStyles = (severity) => {
   }
 };
 
-function ReportCard({ incident, isSelected, onClick }) {
+function ReportCard({ incident, isSelected, onClick, onIssueAlert }) {
   const { type, severity, status, description } = incident;
   const severityStyles = getSeverityStyles(severity);
 
@@ -60,6 +61,21 @@ function ReportCard({ incident, isSelected, onClick }) {
           sx={{ color: severityStyles.color, borderColor: severityStyles.color }}
           variant="outlined"
         />
+
+        {/* NEW: Conditional "Issue Alert" button */}
+        {status === 'Verified' && severity === 'High' && (
+          <Box sx={{ mt: 2, borderTop: '1px solid rgba(255,255,255,0.1)', pt: 1.5 }}>
+            <Button
+              fullWidth
+              variant="outlined"
+              color="warning"
+              startIcon={<CrisisAlertIcon />}
+              onClick={onIssueAlert} // Call the new handler
+            >
+              Issue Alert
+            </Button>
+          </Box>
+        )}
       </Box>
     </motion.div>
   );
