@@ -5,6 +5,7 @@ import MenuIcon from '@mui/icons-material/Menu';
 import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
 import { mockIncidents } from '../mockData';
 import ReportCard from './ReportCard';
+import { Switch, FormControlLabel } from '@mui/material';
 
 // Animation variants for Framer-motion
 const panelVariants = {
@@ -13,7 +14,16 @@ const panelVariants = {
   exit: { x: '-100%', transition: { duration: 0.5, ease: 'easeInOut' } },
 };
 
-function SidePanel({ isMobile, selectedIncident, setSelectedIncident, onAddReport }) {
+function SidePanel({
+  isMobile,
+  selectedIncident,
+  setSelectedIncident,
+  onAddReport,
+  showSensors,
+  setShowSensors,
+  showPrediction,
+  setShowPrediction,
+}) {
   const [filter, setFilter] = useState('All');
   const [mobileOpen, setMobileOpen] = useState(false);
   const theme = useTheme();
@@ -63,8 +73,17 @@ function SidePanel({ isMobile, selectedIncident, setSelectedIncident, onAddRepor
         <ToggleButton value="Verified">Verified</ToggleButton>
         <ToggleButton value="Unverified">Unverified</ToggleButton>
       </ToggleButtonGroup>
-
       {/* Report List */}
+      <Box sx={{ display: 'flex', justifyContent: 'space-around', my: 2 }}>
+        <FormControlLabel
+          control={<Switch checked={showSensors} onChange={(e) => setShowSensors(e.target.checked)} />}
+          label="Show IoT Sensors"
+        />
+        <FormControlLabel
+          control={<Switch checked={showPrediction} onChange={(e) => setShowPrediction(e.target.checked)} color="warning" />}
+          label="AI Prediction"
+        />
+      </Box>
       <Box sx={{ overflowY: 'auto', flexGrow: 1 }}>
         <AnimatePresence>
           {filteredIncidents.map(incident => (

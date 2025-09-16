@@ -1,15 +1,30 @@
-import React from 'react';
+import React, { useState } from 'react'; // Import useState
 import { Dialog, DialogTitle, DialogContent, TextField, DialogActions, Button, Select, MenuItem, InputLabel, FormControl, Box } from '@mui/material';
 import AddPhotoAlternateIcon from '@mui/icons-material/AddPhotoAlternate';
+import CircularProgress from '@mui/material/CircularProgress';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 
 function ReportDialog({ open, handleClose }) {
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [isVerified, setIsVerified] = useState(false);
+
+  const handleUpload = () => {
+    setIsAnalyzing(true);
+    setIsVerified(false);
+    // Simulate a 2.5 second analysis
+    setTimeout(() => {
+      setIsAnalyzing(false);
+      setIsVerified(true);
+    }, 2500);
+  };
 
   const handleSubmit = () => {
-    // For the prototype, just shows an alert and closes the dialog.
-    // Would have to handle state and submissions for complete app
-    alert('Prototype: Thank you! Your report has been submitted for verification.');
+    alert('Prototype: Report Submitted!');
     handleClose();
+    setIsAnalyzing(false);
+    setIsVerified(false);
   };
+
 
   return (
     <Dialog 
@@ -24,39 +39,32 @@ function ReportDialog({ open, handleClose }) {
         }
       }}
     >
-      <DialogTitle sx={{ fontWeight: 'bold' }}>Submit New Hazard Report</DialogTitle>
-      <DialogContent>
-        <Box component="form" sx={{ display: 'flex', flexDirection: 'column', gap: 2, pt: 1 }}>
-          <FormControl fullWidth>
-            <InputLabel>Hazard Type</InputLabel>
-            <Select label="Hazard Type" defaultValue="">
-              <MenuItem value="Coastal Flooding">Coastal Flooding</MenuItem>
-              <MenuItem value="High Waves">High Waves</MenuItem>
-              <MenuItem value="Damaged Structure">Damaged Structure</MenuItem>
-              <MenuItem value="Other">Other</MenuItem>
-            </Select>
-          </FormControl>
-          <TextField
-            label="Description"
-            fullWidth
-            multiline
-            rows={4}
-            placeholder="Provide a brief description of the situation..."
-          />
-          <Button 
-            variant="outlined" 
-            component="label" 
-            startIcon={<AddPhotoAlternateIcon />}
-          >
-            Upload Photo/Video
-            <input type="file" hidden />
-          </Button>
+      <Button 
+        variant="outlined" 
+        component="label" 
+        startIcon={<AddPhotoAlternateIcon />}
+        onClick={handleUpload} // Trigger the simulation
+        disabled={isAnalyzing || isVerified} // Disable after clicking
+      >
+        Upload Photo/Video
+        <input type="file" hidden />
+      </Button>
+
+      {/* NEW: Simulation feedback */}
+      {isAnalyzing && (
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mt: 2 }}>
+          <CircularProgress size={24} />
+          <Typography variant="body2">Analyzing image on-device...</Typography>
         </Box>
-      </DialogContent>
-      <DialogActions sx={{ p: '16px 24px' }}>
-        <Button onClick={handleClose}>Cancel</Button>
-        <Button onClick={handleSubmit} variant="contained">Submit</Button>
-      </DialogActions>
+      )}
+      {isVerified && (
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 2, color: 'success.main' }}>
+          <CheckCircleIcon />
+          <Typography variant="body2" sx={{ fontWeight: 'bold' }}>High Confidence: Flooding Detected!</Typography>
+        </Box>
+      )}
+
+      {/* ... DialogActions */}
     </Dialog>
   );
 }

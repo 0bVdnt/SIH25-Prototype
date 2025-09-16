@@ -13,6 +13,8 @@ const azureMapsKey = import.meta.env.VITE_AZURE_MAPS_KEY;
 function App() {
   const [selectedIncident, setSelectedIncident] = useState(null);
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [showSensors, setShowSensors] = useState(true);
+  const [showPrediction, setShowPrediction] = useState(false);
 
   // MUI Hook to check if the screen is small (mobile)
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
@@ -33,24 +35,30 @@ function App() {
       <CssBaseline />
       <AzureMapsProvider>
         <Box sx={{ width: '100vw', height: '100vh', position: 'relative' }}>
-          
+
           {/* Layer 1: The Full-Screen Azure Map */}
           <Box sx={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%' }}>
             <AzureMap options={mapOptions}>
               {/* The MapController will handle markers and camera movement */}
-              <MapController 
-                selectedIncident={selectedIncident} 
-                setSelectedIncident={setSelectedIncident} 
+              <MapController
+                selectedIncident={selectedIncident}
+                setSelectedIncident={setSelectedIncident}
+                showSensors={showSensors}
+                showPrediction={showPrediction}
               />
             </AzureMap>
           </Box>
 
           {/* Layer 2: The Floating UI */}
-          <SidePanel 
+          <SidePanel
             isMobile={isMobile}
-            selectedIncident={selectedIncident} 
+            selectedIncident={selectedIncident}
             setSelectedIncident={setSelectedIncident}
             onAddReport={() => setDialogOpen(true)}
+            showSensors={showSensors}
+            setShowSensors={setShowSensors}
+            showPrediction={showPrediction}
+            setShowPrediction={setShowPrediction}
           />
 
           {/* Hidden dialog until the 'Add Report' button is clicked */}

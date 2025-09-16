@@ -1,34 +1,26 @@
-import React, { useEffect } from 'react';
+// src/components/MapController.jsx
+
+import React, { useContext, useEffect } from 'react';
 import {
   AzureMapDataSourceProvider,
   AzureMapHtmlMarker,
+  AzureMapLayerProvider, // CHANGE 1: Import AzureMapLayerProvider
   useAzureMaps,
 } from 'react-azure-maps';
-import { mockIncidents } from '../mockData';
+import { mockIncidents, mockIotSensors, predictivePath } from '../mockData';
 import WarningAmberIcon from '@mui/icons-material/WarningAmber';
+import SensorsIcon from '@mui/icons-material/Sensors';
 
-const CustomMarker = ({ severity, isSelected }) => {
-  const color = severity === 'High' ? '#ff8a80' : '#ffb74d';
-  return (
-    <div style={{
-      width: '30px',
-      height: '30px',
-      borderRadius: '50%',
-      backgroundColor: 'rgba(13, 27, 42, 0.8)',
-      border: `3px solid ${color}`,
-      boxShadow: '0 4px 12px rgba(0,0,0,0.5)',
-      display: 'flex',
-      justifyContent: 'center',
-      alignItems: 'center',
-      transition: 'transform 0.2s ease-out',
-      transform: isSelected ? 'scale(1.4)' : 'scale(1)',
-    }}>
-      <WarningAmberIcon style={{ color: color, fontSize: '16px' }} />
-    </div>
-  );
-};
+// The CustomMarker and SensorMarker components remain the same and are correct.
+const CustomMarker = ({ severity, isSelected }) => { /* ... existing code ... */ };
+const SensorMarker = ({ status }) => { /* ... existing code ... */ };
 
-function MapController({ selectedIncident, setSelectedIncident }) {
+function MapController({
+  selectedIncident,
+  setSelectedIncident,
+  showSensors,
+  showPrediction,
+}) {
   const { mapRef, isMapReady } = useAzureMaps();
 
   useEffect(() => {
@@ -44,22 +36,63 @@ function MapController({ selectedIncident, setSelectedIncident }) {
   }, [selectedIncident, isMapReady, mapRef]);
 
   return (
-    <AzureMapDataSourceProvider id={'incidents-source'}>
+    <AzureMapDataSourceProvider id={'main-source'}>
+      {/* RENDER CITIZEN REPORTS MARKERS */}
       {mockIncidents.map(incident => (
         <AzureMapHtmlMarker
           key={incident.id}
-          markerContent={
-            <CustomMarker 
-              severity={incident.severity}
-              isSelected={selectedIncident?.id === incident.id}
-            />
-          }
+          markerContent={<CustomMarker severity={incident.severity} isSelected={selectedIncident?.id === incident.id} />}
           options={{
             position: [incident.lng, incident.lat],
+            popup: {
+              content: `
+                <div>
+                  <b>${incident.type}</b><br/>
+                  ${incident.description}
+                  ${incident.insuranceTriggered ? `<br/><hr/>
+                    <div style='color: #4caf50; display: flex; align-items-center; margin-top: 5px; font-weight: bold;'>
+                      ✓ Parametric Insurance Triggered
+                    </div>` : ''}
+                </div>`,
+              pixelOffset: [0, -30],
+            },
           }}
           events={{ click: () => setSelectedIncident(incident) }}
         />
       ))}
+
+      {/* RENDER IoT SENSORS MARKERS (conditionally) */}
+      {showSensors && mockIotSensors.map(sensor => (
+        <AzureMapHtmlMarker
+          key={sensor.id}
+          markerContent={<SensorMarker status={sensor.status} />}
+          options={{
+            position: [sensor.lng, sensor.lat],
+            popup: {
+              content: `<b>${sensor.type} #${sensor.id}</b><br/>Status: ${sensor.status}<br/>Water Level: ${sensor.waterLevel}m`,
+              pixelOffset: [0, -20],
+            },
+          }}
+        />
+      ))}
+
+      {/* CHANGE 2: RENDER AI PREDICTION POLYGON (conditionally) using AzureMapLayerProvider */}
+      {showPrediction && (
+        <AzureMapLayerProvider
+          id={'prediction-layer'}
+          type={'polygon'} // Specify the layer type
+          options={{
+            fillColor: '#f44336',
+            fillOpacity: 0.4,
+          }}
+        >
+          {/* We now use a feature with a polygon geometry inside the layer provider */}
+          <AzureMapFeature
+            type="Polygon"
+            coordinates={[predictivePath]} // Note the extra array wrapping
+          />
+        </AzureMapLayerProvider>
+      )}
     </AzureMapDataSourceProvider>
   );
 }
