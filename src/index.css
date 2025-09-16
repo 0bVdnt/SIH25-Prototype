@@ -1,0 +1,237 @@
+/* Import external CSS first */
+@import 'leaflet/dist/leaflet.css';
+
+/* Tailwind directives */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Custom base styles */
+@layer base {
+  :root {
+    font-family: 'Segoe UI', system-ui, 'Inter', Avenir, Helvetica, Arial, sans-serif;
+    line-height: 1.5;
+    font-weight: 400;
+  }
+
+  body {
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
+    background: white;
+    color: #1f2937;
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+
+  /* Smooth transitions for all interactive elements */
+  button, a, input, textarea, select {
+    transition: all 0.2s ease-in-out;
+  }
+
+  /* Focus styles for accessibility */
+  button:focus-visible,
+  input:focus-visible,
+  textarea:focus-visible,
+  select:focus-visible {
+    outline: 2px solid #0066CC;
+    outline-offset: 2px;
+  }
+}
+
+/* Custom component styles */
+@layer components {
+  /* Custom scrollbar styles */
+  .scrollbar-thin::-webkit-scrollbar {
+    width: 6px;
+  }
+  .scrollbar-thin::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+  }
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    background: #415a77;
+    border-radius: 10px;
+  }
+  .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+    background: #778da9;
+  }
+
+  /* Enhanced button hover effects */
+  .btn-hover-lift {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .btn-hover-lift:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  }
+
+  /* Card hover effects */
+  .card-hover {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .card-hover:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  }
+
+  /* Loading animations */
+  .pulse-slow {
+    animation: pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
+
+  /* Fade in animation */
+  .fade-in {
+    animation: fadeIn 0.5s ease-in-out;
+  }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /* Slide in from left */
+  .slide-in-left {
+    animation: slideInLeft 0.5s ease-out;
+  }
+
+  @keyframes slideInLeft {
+    from {
+      opacity: 0;
+      transform: translateX(-30px);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+
+  /* Slide in from right */
+  .slide-in-right {
+    animation: slideInRight 0.5s ease-out;
+  }
+
+  @keyframes slideInRight {
+    from {
+      opacity: 0;
+      transform: translateX(30px);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+
+  /* Zoom in animation */
+  .zoom-in {
+    animation: zoomIn 0.3s ease-out;
+  }
+
+  @keyframes zoomIn {
+    from {
+      opacity: 0;
+      transform: scale(0.9);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+
+  /* Enhanced focus styles */
+  .focus-ring {
+    transition: all 0.2s ease-in-out;
+  }
+  .focus-ring:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(0, 102, 204, 0.5);
+  }
+
+  /* Gradient backgrounds */
+  .gradient-ocean {
+    background: linear-gradient(135deg, #0066CC 0%, #004080 100%);
+  }
+
+  .gradient-sunset {
+    background: linear-gradient(135deg, #FF6B6B 0%, #ffa500 100%);
+  }
+
+  /* Glass morphism effect */
+  .glass {
+    background: rgba(255, 255, 255, 0.25);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+  }
+
+  /* Enhanced shadow utilities */
+  .shadow-elegant {
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  }
+
+  .shadow-elegant-lg {
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  }
+
+  /* Mobile responsive utilities */
+  @media (max-width: 640px) {
+    .mobile-padding {
+      padding-left: 1rem;
+      padding-right: 1rem;
+    }
+    
+    .mobile-text-sm {
+      font-size: 0.875rem;
+    }
+  }
+
+  /* Print styles */
+  @media print {
+    .no-print {
+      display: none !important;
+    }
+    
+    body {
+      color: black;
+      background: white;
+    }
+  }
+
+  /* High contrast mode support */
+  @media (prefers-contrast: high) {
+    .ocean-500 {
+      background-color: #000080 !important;
+    }
+    
+    .text-gray-600 {
+      color: #000000 !important;
+    }
+  }
+
+  /* Reduced motion support */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+
+  /* Dark mode support (future enhancement) */
+  @media (prefers-color-scheme: dark) {
+    .dark-mode {
+      background-color: #1f2937;
+      color: #f9fafb;
+    }
+  }
+}
