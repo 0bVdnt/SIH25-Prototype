@@ -18,6 +18,7 @@ import ModernSubmitReportPage from './pages/ModernSubmitReportPage';
 import AboutPage from './pages/AboutPage';
 import GamificationPage from './pages/GamificationPage';
 import AdminDashboard from './pages/AdminDashboard';
+import MapPage from './pages/MapPage';
 
 function App() {
   return (
@@ -39,6 +40,12 @@ function App() {
               <Route path="/reports" element={
                 <Layout>
                   <ModernReportsPage />
+                </Layout>
+              } />
+              
+              <Route path="/map" element={
+                <Layout>
+                  <MapPage />
                 </Layout>
               } />
               

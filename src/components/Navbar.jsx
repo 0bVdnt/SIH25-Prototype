@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { Waves, Menu, X, LogOut, User, Shield, MapPin, FileText, Info, Trophy } from 'lucide-react';
+import { Waves, Menu, X, LogOut, User, Shield, MapPin, FileText, Info, Trophy, Map } from 'lucide-react';
 import NotificationCenter from './NotificationCenter';
 
 const Navbar = () => {
@@ -19,11 +19,12 @@ const Navbar = () => {
   const navLinks = [
     { to: '/', label: 'Home', icon: Waves },
     { to: '/reports', label: 'Reports', icon: MapPin },
+    { to: '/map', label: 'Map', icon: Map },
     { to: '/about', label: 'About', icon: Info },
   ];
 
   if (user?.role === 'citizen') {
-    navLinks.splice(2, 0, { to: '/submit-report', label: 'Report Hazard', icon: FileText });
+    navLinks.splice(3, 0, { to: '/submit-report', label: 'Report Hazard', icon: FileText });
     navLinks.push({ to: '/gamification', label: 'Rewards', icon: Trophy });
   }
 
@@ -55,7 +56,7 @@ const Navbar = () => {
                 <Link
                   key={to}
                   to={to}
-                  className={`group flex items-center justify-center space-x-2 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all duration-300 relative min-w-[120px] text-center ${
+                  className={`group flex items-center justify-center space-x-2 px-5 py-2.5 rounded-xl text-sm font-semibold transition-all duration-300 relative flex-1 text-center ${
                     isActive(to)
                       ? 'text-ocean-600 bg-white shadow-md border border-ocean-200'
                       : 'text-gray-600 hover:text-ocean-600 hover:bg-white/60'

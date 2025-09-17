@@ -1,5 +1,6 @@
 /* Import external CSS first */
 @import 'leaflet/dist/leaflet.css';
+@import 'azure-maps-control/dist/atlas.min.css';
 
 /* Tailwind directives */
 @tailwind base;
