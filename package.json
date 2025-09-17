@@ -17,12 +17,9 @@
     "@emotion/styled": "^11.14.1",
     "@mui/icons-material": "^7.3.2",
     "@mui/material": "^7.3.2",
-    "azure-maps-control": "^3.6.1",
     "cors": "^2.8.5",
     "express": "^5.1.0",
     "framer-motion": "^12.23.13",
-    "html2canvas": "^1.4.1",
-    "jspdf": "^3.0.2",
     "leaflet": "^1.9.4",
     "lucide-react": "^0.544.0",
     "react": "^19.1.1",
@@ -31,7 +28,6 @@
     "react-leaflet": "^5.0.0",
     "react-router-dom": "^7.9.1",
     "react-spring": "^10.0.1",
-    "react-toastify": "^11.0.5",
     "recharts": "^3.2.1"
   },
   "devDependencies": {
