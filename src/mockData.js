@@ -1,4 +1,4 @@
-// Mock data for ocean hazard reports
+  // Mock data for ocean hazard reports
 export const mockReports = [
   {
     id: 1,
@@ -242,22 +242,12 @@ export const mockReports = [
   }
 ];
 
-// Hazard type configurations
+// Hazard type configurations - focused on ocean hazards only
 export const hazardTypes = {
   'high-tide': {
     label: 'High Tide',
     color: '#0066CC',
     icon: '🌊'
-  },
-  'storm': {
-    label: 'Storm/Cyclone',
-    color: '#6B7280',
-    icon: '🌪️'
-  },
-  'pollution': {
-    label: 'Water Pollution',
-    color: '#10B981',
-    icon: '🏭'
   },
   'jellyfish': {
     label: 'Jellyfish Swarm',

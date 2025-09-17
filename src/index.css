@@ -64,6 +64,98 @@
     -moz-osx-font-smoothing: grayscale;
   }
 
+  /* Custom Scrollbar Styles - Ocean Theme */
+  ::-webkit-scrollbar {
+    width: 12px;
+    height: 12px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: linear-gradient(180deg, #f0f9ff 0%, #e0f2fe 100%);
+    border-radius: 10px;
+    border: 1px solid rgba(0, 102, 204, 0.1);
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg, #0066CC 0%, #004080 50%, #0369a1 100%);
+    border-radius: 10px;
+    border: 2px solid #f0f9ff;
+    box-shadow: 
+      inset 0 1px 2px rgba(255, 255, 255, 0.3),
+      0 2px 4px rgba(0, 102, 204, 0.2);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(180deg, #004080 0%, #0066CC 50%, #0369a1 100%);
+    border-color: #e0f2fe;
+    box-shadow: 
+      inset 0 1px 2px rgba(255, 255, 255, 0.4),
+      0 4px 8px rgba(0, 102, 204, 0.3);
+    transform: scale(1.05);
+  }
+
+  ::-webkit-scrollbar-thumb:active {
+    background: linear-gradient(180deg, #002855 0%, #004080 50%, #0066CC 100%);
+    box-shadow: 
+      inset 0 2px 4px rgba(0, 0, 0, 0.2),
+      0 1px 2px rgba(0, 102, 204, 0.4);
+  }
+
+  ::-webkit-scrollbar-corner {
+    background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+    border-radius: 10px;
+  }
+
+  /* Firefox Scrollbar Styling */
+  html {
+    scrollbar-width: thin;
+    scrollbar-color: #0066CC #f0f9ff;
+  }
+
+  /* Custom Scrollbar for Modal/Dialog Components */
+  .modal-content::-webkit-scrollbar,
+  .dialog-content::-webkit-scrollbar,
+  .sidebar-content::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  .modal-content::-webkit-scrollbar-track,
+  .dialog-content::-webkit-scrollbar-track,
+  .sidebar-content::-webkit-scrollbar-track {
+    background: rgba(240, 249, 255, 0.8);
+    border-radius: 6px;
+  }
+
+  .modal-content::-webkit-scrollbar-thumb,
+  .dialog-content::-webkit-scrollbar-thumb,
+  .sidebar-content::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg, #0066CC 0%, #004080 100%);
+    border-radius: 6px;
+    border: 1px solid rgba(240, 249, 255, 0.5);
+  }
+
+  .modal-content::-webkit-scrollbar-thumb:hover,
+  .dialog-content::-webkit-scrollbar-thumb:hover,
+  .sidebar-content::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(180deg, #004080 0%, #0066CC 100%);
+  }
+
+  /* Scrollbar for Dark Mode (if implemented) */
+  .dark ::-webkit-scrollbar-track {
+    background: linear-gradient(180deg, #1f2937 0%, #111827 100%);
+    border: 1px solid rgba(75, 85, 99, 0.3);
+  }
+
+  .dark ::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg, #3b82f6 0%, #1d4ed8 100%);
+    border: 2px solid #1f2937;
+  }
+
+  .dark ::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(180deg, #1d4ed8 0%, #3b82f6 100%);
+  }
+
   /* Smooth transitions for all interactive elements */
   * {
     transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
@@ -278,6 +370,120 @@
     to {
       opacity: 1;
       transform: translateX(0);
+    }
+  }
+
+  /* Azure Maps Marker Animations */
+  .marker-pulse {
+    animation: markerPulse 2s infinite;
+  }
+
+  @keyframes markerPulse {
+    0% {
+      transform: scale(1);
+      opacity: 1;
+    }
+    50% {
+      transform: scale(1.2);
+      opacity: 0.7;
+    }
+    100% {
+      transform: scale(1);
+      opacity: 1;
+    }
+  }
+
+  .marker-bounce {
+    animation: markerBounce 0.6s ease-out;
+  }
+
+  @keyframes markerBounce {
+    0% {
+      transform: translateY(0) scale(1);
+    }
+    25% {
+      transform: translateY(-10px) scale(1.1);
+    }
+    50% {
+      transform: translateY(-5px) scale(1.05);
+    }
+    75% {
+      transform: translateY(-2px) scale(1.02);
+    }
+    100% {
+      transform: translateY(0) scale(1);
+    }
+  }
+
+  .marker-glow {
+    animation: markerGlow 3s ease-in-out infinite alternate;
+  }
+
+  @keyframes markerGlow {
+    from {
+      filter: drop-shadow(0 0 5px rgba(0, 102, 204, 0.5));
+    }
+    to {
+      filter: drop-shadow(0 0 20px rgba(0, 102, 204, 0.8)) drop-shadow(0 0 30px rgba(0, 102, 204, 0.4));
+    }
+  }
+
+  /* Enhanced Map Popup Animations */
+  .popup-slide-up {
+    animation: popupSlideUp 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  @keyframes popupSlideUp {
+    from {
+      opacity: 0;
+      transform: translateY(20px) scale(0.9);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+  }
+
+  .popup-fade-in {
+    animation: popupFadeIn 0.3s ease-out;
+  }
+
+  @keyframes popupFadeIn {
+    from {
+      opacity: 0;
+      transform: scale(0.95);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+
+  /* Wave Animation for Ocean Theme */
+  .wave-animation {
+    animation: waveMove 3s ease-in-out infinite;
+  }
+
+  @keyframes waveMove {
+    0%, 100% {
+      transform: translateX(0);
+    }
+    50% {
+      transform: translateX(10px);
+    }
+  }
+
+  /* Floating Animation for Markers */
+  .float-animation {
+    animation: float 4s ease-in-out infinite;
+  }
+
+  @keyframes float {
+    0%, 100% {
+      transform: translateY(0px);
+    }
+    50% {
+      transform: translateY(-5px);
     }
   }
 
