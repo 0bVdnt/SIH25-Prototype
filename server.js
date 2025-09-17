@@ -326,10 +326,10 @@ app.get('/api/admin/stats', (req, res) => {
   res.json({ success: true, stats });
 });
 
-// Serve React app for all other routes (temporarily commented out)
-// app.get('*', (req, res) => {
-//   res.sendFile(path.join(__dirname, 'dist', 'index.html'));
-// });
+// Serve React app for all other routes (SPA fallback)
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, 'dist', 'index.html'));
+});
 
 // Error handling middleware
 app.use((error, req, res, next) => {

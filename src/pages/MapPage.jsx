@@ -12,7 +12,7 @@ const MapPage = () => {
   const [lastUpdated, setLastUpdated] = useState(new Date());
 
   // Azure Maps subscription key - use import.meta.env for Vite
-  const AZURE_MAPS_KEY = import.meta.env.VITE_AZURE_MAPS_KEY || 'demo-key-placeholder';
+  const AZURE_MAPS_KEY = import.meta.env.VITE_AZURE_MAPS_KEY || 'CjkwxWSlkIJBrkLJxh2G469pYElCVSCAmpwzMUhnoiEvIfHlWtPiJQQJ99BIACYeBjFvT24DAAAgAZMP3D2x';
 
   useEffect(() => {
     // Load reports data
@@ -85,88 +85,103 @@ const MapPage = () => {
 
   const initializeMap = () => {
     if (mapRef.current) {
-      // Check if we have a valid Azure Maps key
-      if (!AZURE_MAPS_KEY || AZURE_MAPS_KEY === 'demo-key-placeholder') {
-        // Demo mode - show a placeholder map
+      try {
+        const mapInstance = new atlas.Map(mapRef.current, {
+          center: [78.9629, 20.5937], // Center of India
+          zoom: 5,
+          minZoom: 4,
+          maxZoom: 18,
+          view: 'Auto',
+          authOptions: {
+            authType: 'subscriptionKey',
+            subscriptionKey: AZURE_MAPS_KEY
+          },
+          style: 'road', // Changed to 'road' for better marker visibility
+          showLogo: false,
+          showFeedbackLink: false,
+          // Restrict the map bounds to focus on India and surrounding areas
+          bounds: [
+            68.0, 6.0,   // Southwest corner (longitude, latitude)
+            97.0, 37.0   // Northeast corner (longitude, latitude)
+          ],
+          padding: {
+            top: 50,
+            bottom: 50,
+            left: 50,
+            right: 50
+          }
+        });
+
+        // Add map ready event
+        mapInstance.events.add('ready', () => {
+          console.log('Azure Maps loaded successfully');
+          setMap(mapInstance);
+          setLoading(false);
+          
+          // Add zoom and style controls
+          mapInstance.controls.add([
+            new atlas.control.ZoomControl(),
+            new atlas.control.StyleControl({
+              mapStyles: ['road', 'satellite', 'road_shaded_relief', 'grayscale_dark']
+            })
+          ], {
+            position: 'top-right'
+          });
+
+          // Add markers once map is ready
+          if (reports.length > 0) {
+            addMarkersToMap(reports);
+          }
+        });
+
+        // Add error handling
+        mapInstance.events.add('error', (error) => {
+          console.error('Azure Maps error:', error);
+          setLoading(false);
+          
+          // Show fallback content
+          mapRef.current.innerHTML = `
+            <div class="flex items-center justify-center h-full bg-gradient-to-br from-red-100 to-red-200 rounded-lg">
+              <div class="text-center p-8">
+                <div class="bg-white rounded-2xl p-6 shadow-lg max-w-md">
+                  <div class="text-6xl mb-4">⚠️</div>
+                  <h3 class="text-xl font-bold text-gray-900 mb-2">Map Loading Error</h3>
+                  <p class="text-gray-600 mb-4">Unable to load Azure Maps</p>
+                  <div class="bg-red-50 border border-red-200 rounded-lg p-3">
+                    <p class="text-sm text-red-800">
+                      <strong>Possible issues:</strong><br>
+                      • Network connectivity<br>
+                      • Invalid API key<br>
+                      • Service temporarily unavailable
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          `;
+        });
+      } catch (error) {
+        console.error('Failed to initialize Azure Maps:', error);
         setLoading(false);
-        console.warn('Azure Maps key not found. Please add VITE_AZURE_MAPS_KEY to your .env file');
         
-        // Create a simple demo map placeholder
+        // Show error message
         mapRef.current.innerHTML = `
-          <div class="flex items-center justify-center h-full bg-gradient-to-br from-blue-100 to-blue-200 rounded-lg">
+          <div class="flex items-center justify-center h-full bg-gradient-to-br from-yellow-100 to-yellow-200 rounded-lg">
             <div class="text-center p-8">
               <div class="bg-white rounded-2xl p-6 shadow-lg max-w-md">
-                <div class="text-6xl mb-4">🗺️</div>
-                <h3 class="text-xl font-bold text-gray-900 mb-2">Demo Mode</h3>
-                <p class="text-gray-600 mb-4">Azure Maps integration ready!</p>
-                <div class="bg-blue-50 border border-blue-200 rounded-lg p-3">
-                  <p class="text-sm text-blue-800">
-                    <strong>To activate:</strong><br>
-                    1. Get Azure Maps key from portal.azure.com<br>
-                    2. Add VITE_AZURE_MAPS_KEY to your .env file<br>
-                    3. Restart the development server
+                <div class="text-6xl mb-4">🔧</div>
+                <h3 class="text-xl font-bold text-gray-900 mb-2">Initialization Error</h3>
+                <p class="text-gray-600 mb-4">Failed to initialize map component</p>
+                <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-3">
+                  <p class="text-sm text-yellow-800">
+                    Please refresh the page or check the console for more details.
                   </p>
                 </div>
               </div>
             </div>
           </div>
         `;
-        return;
       }
-
-      const mapInstance = new atlas.Map(mapRef.current, {
-        center: [78.9629, 20.5937], // Center of India
-        zoom: 5,
-        minZoom: 4,
-        maxZoom: 18,
-        view: 'Auto',
-        authOptions: {
-          authType: 'subscriptionKey',
-          subscriptionKey: AZURE_MAPS_KEY
-        },
-        style: 'road', // Changed to 'road' for better marker visibility
-        showLogo: false,
-        showFeedbackLink: false,
-        // Restrict the map bounds to focus on India and surrounding areas
-        bounds: [
-          68.0, 6.0,   // Southwest corner (longitude, latitude)
-          97.0, 37.0   // Northeast corner (longitude, latitude)
-        ],
-        padding: {
-          top: 50,
-          bottom: 50,
-          left: 50,
-          right: 50
-        }
-      });
-
-      // Add map ready event
-      mapInstance.events.add('ready', () => {
-        console.log('Azure Maps loaded successfully');
-        setMap(mapInstance);
-        setLoading(false);
-        
-        // Add zoom and style controls
-        mapInstance.controls.add([
-          new atlas.control.ZoomControl(),
-          new atlas.control.StyleControl({
-            mapStyles: ['road', 'satellite', 'road_shaded_relief', 'grayscale_dark']
-          })
-        ], {
-          position: 'top-right'
-        });
-
-        // Add markers once map is ready
-        if (reports.length > 0) {
-          addMarkersToMap(reports);
-        }
-      });
-
-      // Add error handling
-      mapInstance.events.add('error', (error) => {
-        console.error('Azure Maps error:', error);
-        setLoading(false);
-      });
     }
   };
 

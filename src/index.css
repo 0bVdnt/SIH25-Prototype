@@ -553,6 +553,94 @@
     line-clamp: 3;
   }
 
+  /* React Toastify Custom Styles */
+  .toast-container-custom {
+    z-index: 9999 !important;
+  }
+
+  .Toastify__toast {
+    background: white !important;
+    color: #374151 !important;
+    border-radius: 12px !important;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04) !important;
+    border: 1px solid rgba(0, 0, 0, 0.05) !important;
+    font-family: 'Inter', 'Segoe UI', system-ui, sans-serif !important;
+    font-size: 14px !important;
+    font-weight: 500 !important;
+    min-height: 60px !important;
+    padding: 16px !important;
+  }
+
+  .Toastify__toast--success {
+    border-left: 4px solid #10b981 !important;
+  }
+
+  .Toastify__toast--success .Toastify__toast-icon {
+    color: #10b981 !important;
+  }
+
+  .Toastify__toast--error {
+    border-left: 4px solid #ef4444 !important;
+  }
+
+  .Toastify__toast--error .Toastify__toast-icon {
+    color: #ef4444 !important;
+  }
+
+  .Toastify__toast--info {
+    border-left: 4px solid #3b82f6 !important;
+  }
+
+  .Toastify__toast--info .Toastify__toast-icon {
+    color: #3b82f6 !important;
+  }
+
+  .Toastify__toast--warning {
+    border-left: 4px solid #f59e0b !important;
+  }
+
+  .Toastify__toast--warning .Toastify__toast-icon {
+    color: #f59e0b !important;
+  }
+
+  .Toastify__toast-body {
+    color: #374151 !important;
+    font-weight: 500 !important;
+    line-height: 1.5 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  .Toastify__close-button {
+    color: #6b7280 !important;
+    opacity: 0.8 !important;
+  }
+
+  .Toastify__close-button:hover {
+    color: #374151 !important;
+    opacity: 1 !important;
+  }
+
+  .Toastify__progress-bar {
+    height: 3px !important;
+  }
+
+  .Toastify__progress-bar--success {
+    background: #10b981 !important;
+  }
+
+  .Toastify__progress-bar--error {
+    background: #ef4444 !important;
+  }
+
+  .Toastify__progress-bar--info {
+    background: #3b82f6 !important;
+  }
+
+  .Toastify__progress-bar--warning {
+    background: #f59e0b !important;
+  }
+
   /* Responsive Utilities */
   @media (max-width: 768px) {
     .modern-card {
@@ -567,6 +655,19 @@
     
     .modern-input {
       padding: 0.75rem 1rem;
+    }
+
+    .Toastify__toast-container {
+      width: calc(100vw - 2rem) !important;
+      padding: 0 1rem !important;
+    }
+
+    .Toastify__toast {
+      margin-bottom: 0.5rem !important;
+      border-radius: 8px !important;
+      min-height: 50px !important;
+      padding: 12px !important;
+      font-size: 13px !important;
     }
   }
 }

@@ -145,8 +145,45 @@ const ModernReportsPage = () => {
         return newUserVerifications;
       });
       
-      // Show toast message
-      showToast.success(message);
+      // Show toast message with enhanced styling
+      if (currentVote === type) {
+        // Vote removed
+        showToast.success("🗳️ Your vote has been removed", {
+          style: {
+            background: 'white',
+            color: '#374151',
+            borderLeft: '4px solid #6B7280'
+          }
+        });
+      } else if (currentVote && currentVote !== type) {
+        // Vote switched
+        showToast.success(
+          type === 'confirm' 
+            ? "✅ Vote changed to 'Confirmed'" 
+            : "❌ Vote changed to 'Not Relevant'",
+          {
+            style: {
+              background: 'white',
+              color: '#374151',
+              borderLeft: type === 'confirm' ? '4px solid #10B981' : '4px solid #EF4444'
+            }
+          }
+        );
+      } else {
+        // New vote
+        showToast.success(
+          type === 'confirm' 
+            ? "🎯 Report confirmed! Thank you for verifying" 
+            : "📝 Marked as not relevant. Thank you for the feedback",
+          {
+            style: {
+              background: 'white',
+              color: '#374151',
+              borderLeft: type === 'confirm' ? '4px solid #10B981' : '4px solid #EF4444'
+            }
+          }
+        );
+      }
       
       // Clear operation flags
       setTimeout(() => {

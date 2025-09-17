@@ -6,6 +6,7 @@ import { GamificationProvider } from './contexts/GamificationContext';
 import { NotificationProvider } from './contexts/NotificationContext';
 import Layout from './components/Layout';
 import ProtectedRoute from './components/ProtectedRoute';
+import ErrorBoundary from './components/ErrorBoundary';
 
 // Import toast CSS
 import 'react-toastify/dist/ReactToastify.css';
@@ -22,11 +23,12 @@ import MapPage from './pages/MapPage';
 
 function App() {
   return (
-    <AuthProvider>
-      <GamificationProvider>
-        <NotificationProvider>
-          <Router>
-            <Routes>
+    <ErrorBoundary>
+      <AuthProvider>
+        <GamificationProvider>
+          <NotificationProvider>
+            <Router>
+              <Routes>
               {/* Public routes */}
               <Route path="/login" element={<LoginPage />} />
               
@@ -82,26 +84,26 @@ function App() {
               {/* Catch all route */}
               <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
-            
-            {/* Toast Container */}
-            <ToastContainer
-              position="top-right"
-              autoClose={5000}
-              hideProgressBar={false}
-              newestOnTop={false}
-              closeOnClick
-              rtl={false}
-              pauseOnFocusLoss
-              draggable
-              pauseOnHover
-              theme="light"
-              toastClassName="!text-sm"
-              bodyClassName="!text-sm"
-            />
           </Router>
+          
+          {/* Toast Container - moved outside Router for better positioning */}
+          <ToastContainer
+            position="top-right"
+            autoClose={4000}
+            hideProgressBar={false}
+            newestOnTop={true}
+            closeOnClick
+            rtl={false}
+            pauseOnFocusLoss
+            draggable
+            pauseOnHover
+            theme="light"
+            className="toast-container-custom"
+          />
         </NotificationProvider>
       </GamificationProvider>
     </AuthProvider>
+    </ErrorBoundary>
   );
 }
 
