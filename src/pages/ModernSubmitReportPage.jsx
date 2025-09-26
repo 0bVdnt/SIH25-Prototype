@@ -30,6 +30,7 @@ const ModernSubmitReportPage = () => {
   const [showCamera, setShowCamera] = useState(false);
   const [cameraStream, setCameraStream] = useState(null);
   const [isCapturing, setIsCapturing] = useState(false);
+  const [cameraLoading, setCameraLoading] = useState(false);
   const [duplicateCheck, setDuplicateCheck] = useState({
     isChecking: false,
     duplicateFound: false,
@@ -127,14 +128,53 @@ const ModernSubmitReportPage = () => {
   };
 
   const startCamera = async () => {
+    setCameraLoading(true);
+    
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ 
-        video: { 
-          facingMode: 'environment', // Use back camera if available
-          width: { ideal: 1920 },
-          height: { ideal: 1080 }
-        } 
-      });
+      // Check if getUserMedia is supported
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        throw new Error('Camera not supported by this browser');
+      }
+
+      // Show permission request info
+      showToast.info('Requesting camera permission...', { autoClose: 2000 });
+
+      let stream;
+      
+      try {
+        // Try with back camera first (ideal for capturing scenes)
+        stream = await navigator.mediaDevices.getUserMedia({ 
+          video: { 
+            facingMode: 'environment',
+            width: { ideal: 1920, min: 640 },
+            height: { ideal: 1080, min: 480 }
+          } 
+        });
+      } catch (backCameraError) {
+        console.warn('Back camera not available, trying front camera:', backCameraError);
+        
+        try {
+          // Fallback to front camera
+          stream = await navigator.mediaDevices.getUserMedia({ 
+            video: { 
+              facingMode: 'user',
+              width: { ideal: 1280, min: 640 },
+              height: { ideal: 720, min: 480 }
+            } 
+          });
+        } catch (frontCameraError) {
+          console.warn('Front camera not available, trying any camera:', frontCameraError);
+          
+          // Final fallback - any available camera
+          stream = await navigator.mediaDevices.getUserMedia({ 
+            video: {
+              width: { ideal: 1280, min: 320 },
+              height: { ideal: 720, min: 240 }
+            }
+          });
+        }
+      }
+
       setCameraStream(stream);
       setShowCamera(true);
       
@@ -142,60 +182,128 @@ const ModernSubmitReportPage = () => {
       setTimeout(() => {
         if (videoRef.current) {
           videoRef.current.srcObject = stream;
+          videoRef.current.play().catch(playError => {
+            console.error('Error playing video:', playError);
+          });
         }
       }, 100);
+      
     } catch (error) {
       console.error('Error accessing camera:', error);
-      showToast.error('Unable to access camera. Please check permissions and try again.');
+      
+      let errorMessage = 'Unable to access camera. ';
+      
+      if (error.name === 'NotAllowedError') {
+        errorMessage += 'Please allow camera permissions and try again.';
+      } else if (error.name === 'NotFoundError') {
+        errorMessage += 'No camera found on this device.';
+      } else if (error.name === 'NotSupportedError') {
+        errorMessage += 'Camera not supported by this browser.';
+      } else if (error.name === 'NotReadableError') {
+        errorMessage += 'Camera is being used by another application.';
+      } else if (error.message.includes('not supported')) {
+        errorMessage += 'Your browser does not support camera access.';
+      } else {
+        errorMessage += 'Please check your camera and try again.';
+      }
+      
+      showToast.error(errorMessage);
+    } finally {
+      setCameraLoading(false);
     }
   };
 
   const stopCamera = () => {
-    if (cameraStream) {
-      cameraStream.getTracks().forEach(track => track.stop());
+    try {
+      if (cameraStream) {
+        cameraStream.getTracks().forEach(track => {
+          track.stop();
+          console.log(`Stopped ${track.kind} track`);
+        });
+        setCameraStream(null);
+      }
+      
+      // Clear video source
+      if (videoRef.current) {
+        videoRef.current.srcObject = null;
+      }
+      
+      setShowCamera(false);
+    } catch (error) {
+      console.error('Error stopping camera:', error);
+      // Still set the UI state even if there's an error
+      setShowCamera(false);
       setCameraStream(null);
     }
-    setShowCamera(false);
   };
 
   const capturePhoto = () => {
-    if (!videoRef.current || !canvasRef.current) return;
-    
-    setIsCapturing(true);
+    if (!videoRef.current || !canvasRef.current) {
+      showToast.error('Camera not ready. Please try again.');
+      return;
+    }
     
     const video = videoRef.current;
     const canvas = canvasRef.current;
-    const context = canvas.getContext('2d');
     
-    // Set canvas dimensions to match video
-    canvas.width = video.videoWidth;
-    canvas.height = video.videoHeight;
+    // Check if video is actually playing
+    if (video.readyState !== video.HAVE_ENOUGH_DATA) {
+      showToast.error('Camera is still loading. Please wait a moment.');
+      return;
+    }
     
-    // Draw the video frame to canvas
-    context.drawImage(video, 0, 0, canvas.width, canvas.height);
+    if (video.videoWidth === 0 || video.videoHeight === 0) {
+      showToast.error('Camera video not available. Please restart camera.');
+      return;
+    }
     
-    // Convert canvas to blob
-    canvas.toBlob((blob) => {
-      if (blob) {
-        const capturedPhoto = {
-          file: new File([blob], `camera-capture-${Date.now()}.jpg`, { type: 'image/jpeg' }),
-          preview: canvas.toDataURL('image/jpeg'),
-          id: Date.now() + Math.random(),
-          isCaptured: true
-        };
-        
-        setFormData(prev => ({
-          ...prev,
-          photos: [...prev.photos, capturedPhoto]
-        }));
-        
-        // Add flash effect
-        setTimeout(() => {
-          setIsCapturing(false);
-          stopCamera();
-        }, 200);
+    try {
+      setIsCapturing(true);
+      
+      const context = canvas.getContext('2d');
+      if (!context) {
+        throw new Error('Could not get canvas context');
       }
-    }, 'image/jpeg', 0.9);
+      
+      // Set canvas dimensions to match video
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+      
+      // Draw the video frame to canvas
+      context.drawImage(video, 0, 0, canvas.width, canvas.height);
+      
+      // Convert canvas to blob
+      canvas.toBlob((blob) => {
+        if (blob) {
+          const capturedPhoto = {
+            file: new File([blob], `camera-capture-${Date.now()}.jpg`, { type: 'image/jpeg' }),
+            preview: canvas.toDataURL('image/jpeg'),
+            id: Date.now() + Math.random(),
+            isCaptured: true
+          };
+          
+          setFormData(prev => ({
+            ...prev,
+            photos: [...prev.photos, capturedPhoto]
+          }));
+          
+          showToast.success('Photo captured successfully!');
+          
+          // Add flash effect
+          setTimeout(() => {
+            setIsCapturing(false);
+            stopCamera();
+          }, 200);
+        } else {
+          throw new Error('Failed to create image blob');
+        }
+      }, 'image/jpeg', 0.9);
+      
+    } catch (error) {
+      console.error('Error capturing photo:', error);
+      showToast.error('Failed to capture photo. Please try again.');
+      setIsCapturing(false);
+    }
   };
 
   const handleInputChange = (field, value) => {
@@ -677,15 +785,25 @@ const ModernSubmitReportPage = () => {
 
                 {/* Camera Capture */}
                 <div
-                  onClick={startCamera}
-                  className="border-2 border-dashed border-green-300 hover:border-green-400 rounded-xl p-6 text-center transition-all duration-300 cursor-pointer hover:bg-green-50"
+                  onClick={cameraLoading ? undefined : startCamera}
+                  className={`border-2 border-dashed border-green-300 hover:border-green-400 rounded-xl p-6 text-center transition-all duration-300 ${
+                    cameraLoading ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer hover:bg-green-50'
+                  }`}
                 >
-                  <Camera className="h-12 w-12 text-green-500 mx-auto mb-3" />
-                  <p className="text-lg font-semibold text-gray-700 mb-2">Take Photo</p>
-                  <p className="text-sm text-gray-500">
-                    Use camera to capture directly
+                  {cameraLoading ? (
+                    <div className="animate-spin rounded-full h-12 w-12 border-4 border-green-500 border-t-transparent mx-auto mb-3"></div>
+                  ) : (
+                    <Camera className="h-12 w-12 text-green-500 mx-auto mb-3" />
+                  )}
+                  <p className="text-lg font-semibold text-gray-700 mb-2">
+                    {cameraLoading ? 'Starting Camera...' : 'Take Photo'}
                   </p>
-                  <p className="text-xs text-gray-400 mt-1">Best for real-time hazards</p>
+                  <p className="text-sm text-gray-500">
+                    {cameraLoading ? 'Please allow camera permission' : 'Use camera to capture directly'}
+                  </p>
+                  <p className="text-xs text-gray-400 mt-1">
+                    {cameraLoading ? 'This may take a moment' : 'Best for real-time hazards'}
+                  </p>
                 </div>
               </div>
 

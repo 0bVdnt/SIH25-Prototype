@@ -17,6 +17,7 @@
     "@emotion/styled": "^11.14.1",
     "@mui/icons-material": "^7.3.2",
     "@mui/material": "^7.3.2",
+    "@nivo/pie": "^0.99.0",
     "cors": "^2.8.5",
     "express": "^5.1.0",
     "framer-motion": "^12.23.13",
@@ -28,6 +29,7 @@
     "react-leaflet": "^5.0.0",
     "react-router-dom": "^7.9.1",
     "react-spring": "^10.0.1",
+    "react-toastify": "^11.0.5",
     "recharts": "^3.2.1"
   },
   "devDependencies": {

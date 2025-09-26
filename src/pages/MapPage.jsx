@@ -14,6 +14,8 @@ const MapPage = () => {
   // Azure Maps subscription key - use import.meta.env for Vite
   const AZURE_MAPS_KEY = import.meta.env.VITE_AZURE_MAPS_KEY || 'CjkwxWSlkIJBrkLJxh2G469pYElCVSCAmpwzMUhnoiEvIfHlWtPiJQQJ99BIACYeBjFvT24DAAAgAZMP3D2x';
 
+
+
   useEffect(() => {
     // Load reports data
     fetchReports();
@@ -725,10 +727,11 @@ const MapPage = () => {
         </div>
       </div>
 
-      {/* Map Container */}
-      <div className="relative" style={{ height: 'calc(100vh - 200px)' }}>
-        {/* Legend */}
-        <div className="absolute top-4 left-4 z-10 bg-white rounded-2xl shadow-lg border border-gray-200 p-4">
+      {/* Map Container with margins */}
+      <div className="relative p-6" style={{ height: 'calc(100vh - 200px)' }}>
+        <div className="relative h-full bg-white rounded-xl shadow-lg overflow-hidden border border-gray-200">
+          {/* Legend */}
+          <div className="absolute top-4 left-4 z-10 bg-white rounded-2xl shadow-lg border border-gray-200 p-4">
           <h3 className="text-sm font-bold text-gray-900 mb-3">Status Legend</h3>
           <div className="space-y-2">
             <div className="flex items-center space-x-2">
@@ -757,25 +760,26 @@ const MapPage = () => {
           </div>
         )}
 
-        {/* Azure Maps Container */}
-        <div 
-          ref={mapRef} 
-          className="w-full h-full rounded-lg shadow-lg"
-          style={{ minHeight: '400px' }}
-        />
+          {/* Azure Maps Container */}
+          <div 
+            ref={mapRef} 
+            className="w-full h-full"
+            style={{ minHeight: '400px' }}
+          />
 
-        {/* Map Controls Info */}
-        <div className="absolute bottom-4 right-4 bg-white rounded-2xl shadow-lg border border-gray-200 p-4 max-w-sm">
-          <div className="flex items-center space-x-2 mb-2">
-            <AlertTriangle className="h-5 w-5 text-blue-600" />
-            <span className="text-sm font-bold text-gray-900">Map Controls</span>
-          </div>
-          <div className="text-xs text-gray-600 space-y-1">
-            <p>• Click markers for detailed information</p>
-            <p>• Use mouse wheel to zoom in/out</p>
-            <p>• Drag to pan around the map</p>
-            <p>• Auto-refreshes every 30 seconds</p>
-            <p>• Total markers: {reports.length}</p>
+          {/* Map Controls Info */}
+          <div className="absolute bottom-4 right-4 bg-white rounded-2xl shadow-lg border border-gray-200 p-4 max-w-sm">
+            <div className="flex items-center space-x-2 mb-2">
+              <AlertTriangle className="h-5 w-5 text-blue-600" />
+              <span className="text-sm font-bold text-gray-900">Map Controls</span>
+            </div>
+            <div className="text-xs text-gray-600 space-y-1">
+              <p>• Click markers for detailed information</p>
+              <p>• Use mouse wheel to zoom in/out</p>
+              <p>• Drag to pan around the map</p>
+              <p>• Auto-refreshes every 30 seconds</p>
+              <p>• Total markers: {reports.length}</p>
+            </div>
           </div>
         </div>
       </div>

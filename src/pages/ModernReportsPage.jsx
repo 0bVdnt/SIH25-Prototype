@@ -173,8 +173,8 @@ const ModernReportsPage = () => {
         // New vote
         showToast.success(
           type === 'confirm' 
-            ? "🎯 Report confirmed! Thank you for verifying" 
-            : "📝 Marked as not relevant. Thank you for the feedback",
+            ? "• Report confirmed! Thank you for verifying" 
+            : "• Marked as not relevant. Thank you for the feedback",
           {
             style: {
               background: 'white',

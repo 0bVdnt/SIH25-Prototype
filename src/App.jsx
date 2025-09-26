@@ -18,7 +18,7 @@ import ModernReportsPage from './pages/ModernReportsPage';
 import ModernSubmitReportPage from './pages/ModernSubmitReportPage';
 import AboutPage from './pages/AboutPage';
 import GamificationPage from './pages/GamificationPage';
-import AdminDashboard from './pages/AdminDashboard';
+import ModernAdminDashboard from './pages/ModernAdminDashboard';
 import MapPage from './pages/MapPage';
 
 function App() {
@@ -77,7 +77,7 @@ function App() {
               {/* Protected admin routes */}
               <Route path="/admin" element={
                 <ProtectedRoute requiredRole="admin">
-                  <AdminDashboard />
+                  <ModernAdminDashboard />
                 </ProtectedRoute>
               } />
               

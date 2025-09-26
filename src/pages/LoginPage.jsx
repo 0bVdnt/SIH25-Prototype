@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { Navigate } from 'react-router-dom';
 import { Eye, EyeOff, Waves, Shield, User } from 'lucide-react';
+import Navbar from '../components/Navbar';
 
 const LoginPage = () => {
   const { login, isAuthenticated } = useAuth();
@@ -40,8 +41,11 @@ const LoginPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-ocean-50 to-ocean-100 flex items-center justify-center px-4">
-      <div className="max-w-md w-full space-y-8">
+    <>
+      <Navbar />
+      <div className="min-h-screen bg-gradient-to-br from-ocean-50 to-ocean-100 px-4 py-24 overflow-y-auto">
+        <div className="flex items-center justify-center min-h-full">
+          <div className="max-w-md w-full space-y-8 my-8">
         <div className="text-center">
           <div className="flex justify-center mb-4">
             <div className="bg-ocean-500 p-3 rounded-full">
@@ -56,7 +60,7 @@ const LoginPage = () => {
           </p>
         </div>
 
-        <div className="bg-white rounded-xl shadow-lg p-8">
+        <div className="bg-white rounded-xl shadow-lg p-6 md:p-8 relative z-10">
           {/* User Type Toggle */}
           <div className="flex mb-6 bg-gray-100 p-1 rounded-lg">
             <button
@@ -174,8 +178,10 @@ const LoginPage = () => {
             <p>Admin: admin / admin123</p>
           </div>
         </div>
+          </div>
+        </div>
       </div>
-    </div>
+    </>
   );
 };
 
